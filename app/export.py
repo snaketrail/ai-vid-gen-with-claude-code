@@ -1,0 +1,139 @@
+"""Headless render: drive player.html frame by frame, pipe PNGs to ffmpeg.
+
+This is the export half of the "one renderer, two drivers" design. The studio
+preview calls seek(t) with wall-clock time; here we call it with frame/fps.
+Same code path, so the preview cannot drift from the export (CLAUDE.md 4.2).
+"""
+
+from __future__ import annotations
+
+import subprocess
+from pathlib import Path
+from typing import Callable, Optional
+
+from .models import Project
+from .store import OUTPUT_DIR
+
+ProgressFn = Callable[[float, str], None]
+
+
+def _ffmpeg_cmd(fps: int, out_path: Path, audio_path: Optional[Path]) -> list[str]:
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "image2pipe",
+        "-framerate", str(fps),
+        "-i", "-",
+    ]
+    if audio_path and audio_path.exists():
+        cmd += ["-i", str(audio_path)]
+
+    cmd += [
+        "-c:v", "libx264",
+        "-preset", "medium",
+        "-crf", "20",
+        # Mandatory: without yuv420p many phones and social apps refuse the file.
+        "-pix_fmt", "yuv420p",
+        "-r", str(fps),
+    ]
+    if audio_path and audio_path.exists():
+        cmd += ["-c:a", "aac", "-b:a", "192k", "-shortest"]
+
+    cmd += ["-movflags", "+faststart", str(out_path)]
+    return cmd
+
+
+def render(
+    project: Project,
+    base_url: str = "http://127.0.0.1:8000",
+    audio_path: Optional[Path] = None,
+    on_progress: Optional[ProgressFn] = None,
+) -> Path:
+    """Render the project to MP4. Returns the output path."""
+    from playwright.sync_api import sync_playwright
+
+    fps = project.settings.fps
+    width = project.settings.width
+    height = project.settings.height
+    duration = project.total_duration()
+    if duration <= 0:
+        raise ValueError("Project has no scenes to render.")
+
+    total_frames = max(1, int(round(duration * fps)))
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = OUTPUT_DIR / f"{project.id}.mp4"
+
+    def progress(frac: float, msg: str) -> None:
+        if on_progress:
+            on_progress(frac, msg)
+
+    progress(0.0, "Launching browser")
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(
+            args=[
+                "--disable-lcd-text",           # deterministic glyph rasterisation
+                "--force-device-scale-factor=1",
+                "--hide-scrollbars",
+                "--disable-gpu",                # headless GPU raster is nondeterministic
+            ],
+        )
+        try:
+            page = browser.new_page(
+                viewport={"width": width, "height": height},
+                device_scale_factor=1,
+            )
+            errors: list[str] = []
+            page.on("pageerror", lambda e: errors.append(str(e)))
+
+            page.goto(
+                f"{base_url}/player/player.html?project={project.id}&export=1",
+                wait_until="load",
+            )
+            # window.ready resolves once fonts and images are decoded.
+            page.wait_for_function("window.ready !== undefined", timeout=15000)
+            page.evaluate("window.ready")
+            page.wait_for_selector("body[data-ready='1']", timeout=30000)
+            if errors:
+                raise RuntimeError("Player error: " + "; ".join(errors[:3]))
+
+            progress(0.02, f"Rendering {total_frames} frames")
+
+            proc = subprocess.Popen(
+                _ffmpeg_cmd(fps, out_path, audio_path),
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+            assert proc.stdin is not None
+
+            try:
+                for frame in range(total_frames):
+                    t = frame / fps
+                    page.evaluate("(t) => window.seek(t)", t)
+                    png = page.screenshot(type="png")
+                    proc.stdin.write(png)
+
+                    if frame % 15 == 0 or frame == total_frames - 1:
+                        progress(
+                            0.02 + 0.93 * (frame + 1) / total_frames,
+                            f"Frame {frame + 1}/{total_frames}",
+                        )
+            except BrokenPipeError:
+                # ffmpeg died early — its stderr holds the real reason.
+                stderr = proc.stderr.read().decode("utf-8", "replace") if proc.stderr else ""
+                raise RuntimeError(
+                    f"ffmpeg rejected the frame stream:\n{stderr[-1500:]}"
+                ) from None
+
+            proc.stdin.close()
+            progress(0.96, "Encoding")
+            stderr_out = proc.stderr.read().decode("utf-8", "replace") if proc.stderr else ""
+            code = proc.wait()
+            if code != 0:
+                raise RuntimeError(f"ffmpeg exited {code}:\n{stderr_out[-1500:]}")
+        finally:
+            browser.close()
+
+    progress(1.0, f"Done: {out_path.name}")
+    return out_path

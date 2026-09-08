@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>video-gen-ai studio</title>
+<link rel="stylesheet" href="/studio/studio.css">
+</head>
+<body>
+<header>
+  <h1>video-gen-ai</h1>
+  <div id="health" class="health"></div>
+</header>
+
+<main>
+  <section class="preview-pane">
+    <div class="stage-wrap">
+      <iframe id="player" src="about:blank" scrolling="no"></iframe>
+    </div>
+    <div class="transport">
+      <button id="playBtn" class="btn">▶</button>
+      <input id="scrub" type="range" min="0" max="1" step="0.001" value="0">
+      <span id="timeLabel" class="mono">0.00 / 0.00</span>
+    </div>
+    <div class="export-row">
+      <button id="exportBtn" class="btn primary">Export MP4</button>
+      <div id="exportStatus" class="status"></div>
+    </div>
+    <video id="result" controls playsinline></video>
+  </section>
+
+  <section class="scenes-pane">
+    <div class="pane-head">
+      <h2>Scenes</h2>
+      <button id="addScene" class="btn small">+ Add</button>
+    </div>
+    <div id="sceneList"></div>
+  </section>
+</main>
+
+<script src="/studio/studio.js"></script>
+</body>
+</html>

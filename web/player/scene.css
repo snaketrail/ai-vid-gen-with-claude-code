@@ -1,0 +1,111 @@
+/* Composition styles. Everything here is static presentation only —
+   all motion is applied as inline styles by player.js from seek(t).
+
+   CRITICAL: no CSS animations, keyframes or transitions may ever appear in
+   this file. They run on wall-clock time, so a headless screenshot would
+   catch them mid-flight and the exported MP4 would flicker. See CLAUDE.md 4.1. */
+
+@font-face {
+  font-family: 'Player';
+  src: url('/player/fonts/player.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: block;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  background: #000;
+}
+
+#stage {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: none;
+}
+
+.scene .bg {
+  position: absolute;
+  inset: 0;
+  /* Slightly oversized so pan/zoom never reveals an edge. */
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.scene .bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scene .bg.solid {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Overlay headline text ---- */
+
+.overlay-text {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  font-family: 'Player', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 900;
+  line-height: 1.08;
+  text-align: center;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  -webkit-text-stroke: 10px #000;
+  paint-order: stroke fill;
+  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  will-change: transform, opacity;
+}
+
+.overlay-text.pos-top    { top: 220px; }
+.overlay-text.pos-center { top: 50%; transform: translateY(-50%); }
+.overlay-text.pos-bottom { bottom: 620px; }
+
+/* ---- Captions ---- */
+
+#captions {
+  position: absolute;
+  left: 60px;
+  right: 60px;
+  bottom: 320px;
+  font-family: 'Player', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 78px;
+  line-height: 1.15;
+  text-align: center;
+  color: #fff;
+  text-transform: uppercase;
+  -webkit-text-stroke: 9px #000;
+  paint-order: stroke fill;
+  text-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  display: none;
+}
+
+#captions .w {
+  display: inline-block;
+  /* The text stroke expands each glyph outward, so a normal word gap looks
+     like none at all. This margin is deliberately wide to compensate. */
+  margin: 0.06em 0.22em;
+  will-change: transform;
+}
+
+#captions .w.active {
+  color: #ffd54a;
+}
