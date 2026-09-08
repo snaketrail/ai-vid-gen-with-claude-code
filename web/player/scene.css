@@ -107,6 +107,54 @@ html, body {
   text-decoration: none;
 }
 
+/* ---- Outro / brand end card ---- */
+
+.outro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 60px;
+  font-family: 'Player', 'Segoe UI', system-ui, sans-serif;
+  text-align: center;
+}
+
+/* The logo is wide (roughly 16:9) and must never be cropped or distorted,
+   so it is fitted to the available width. */
+.outro-logo {
+  width: 100%;
+  max-width: 980px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 70px;
+}
+
+.outro-cta {
+  font-size: 82px;
+  font-weight: 900;
+  line-height: 1.18;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  max-width: 900px;
+  -webkit-text-stroke: 9px #000;
+  paint-order: stroke fill;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+
+.outro-site {
+  font-size: 62px;
+  font-weight: 900;
+  color: #4a9eff;
+  -webkit-text-stroke: 8px #000;
+  paint-order: stroke fill;
+  text-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+}
+
 /* ---- Captions ---- */
 
 #captions {

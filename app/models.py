@@ -68,6 +68,8 @@ class Card(BaseModel):
 
 class Scene(BaseModel):
     id: str
+    # "card" is a normal false-friend scene; "outro" is the branded end card.
+    kind: Literal["card", "outro"] = "card"
     # start/duration are always recomputed by the backend, never trusted
     # from the client (CLAUDE.md 5.2).
     start: float = 0.0
@@ -76,6 +78,9 @@ class Scene(BaseModel):
     image: ImageAsset = Field(default_factory=ImageAsset)
     voice: VoiceAsset = Field(default_factory=VoiceAsset)
     card: Card = Field(default_factory=Card)
+    # Extra hold after the voice-over ends. The outro uses it to let the logo
+    # sit on screen for a beat before the video cuts.
+    hold: float = 0.0
 
 
 class Settings(BaseModel):

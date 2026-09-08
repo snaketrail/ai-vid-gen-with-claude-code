@@ -24,22 +24,6 @@ PALETTE = [
 
 MOTIONS = ["zoom_in", "pan_right", "zoom_out", "pan_left", "pan_up", "pan_down"]
 
-# Rough Bulgarian speaking rate for estimating scene length before the real
-# audio exists. Replaced by the true MP3 duration once TTS has run.
-WORDS_PER_SECOND = 2.6
-MIN_SCENE = 2.6
-# Bulgarian numerals, so the intro line always agrees with how many
-# false friends the video actually shows.
-NUMERALS = {1: "Една", 2: "Две", 3: "Три", 4: "Четири", 5: "Пет", 6: "Шест"}
-
-
-def intro_text(count: int) -> str:
-    if count == 1:
-        return "Една английска дума, която българите бъркат."
-    n = NUMERALS.get(count, str(count))
-    return f"{n} английски думи, които българите бъркат."
-
-
 def load_deck() -> list[dict]:
     data = json.loads(DECK_PATH.read_text(encoding="utf-8"))
     return data["items"]

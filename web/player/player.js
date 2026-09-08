@@ -59,7 +59,14 @@
     const bg = document.createElement('div');
     bg.className = 'bg';
 
-    if (scene.image && scene.image.asset) {
+    const isOutro = scene.kind === 'outro';
+
+    if (isOutro) {
+      // The outro is a fixed brand mark: flat background, logo shown whole
+      // (never cropped), no motion. Not a photo, so `cover` would be wrong.
+      bg.classList.add('solid');
+      bg.style.background = (scene.image && scene.image.placeholder_color) || '#0e1527';
+    } else if (scene.image && scene.image.asset) {
       const img = document.createElement('img');
       img.src = `/media/${projectId}/${scene.image.asset}`;
       bg.appendChild(img);
@@ -70,6 +77,27 @@
       bg.style.background = (scene.image && scene.image.placeholder_color) || '#2b3a55';
     }
     root.appendChild(bg);
+
+    if (isOutro) {
+      const wrap = document.createElement('div');
+      wrap.className = 'outro';
+      if (scene.image && scene.image.asset) {
+        const logo = document.createElement('img');
+        logo.className = 'outro-logo';
+        logo.src = `/media/${projectId}/${scene.image.asset}`;
+        wrap.appendChild(logo);
+      }
+      // The logo already carries the domain, so the text below is just the
+      // call to action — repeating the URL would read as a mistake.
+      const cta = document.createElement('div');
+      cta.className = 'outro-cta';
+      cta.textContent = 'Абонирайте се за повече видеа';
+      wrap.appendChild(cta);
+      root.appendChild(wrap);
+      stage.appendChild(root);
+      sceneEls.set(scene.id, { root, bg, scene });
+      return;
+    }
 
     // The false-friend card: static for the whole scene. Only the captions
     // move — deliberate, so the word stays readable while the VO plays.
@@ -133,6 +161,15 @@
   const CHUNK = 4; // words shown together
 
   function renderCaptions(t) {
+    // The outro shows its call to action as fixed layout text, so captions
+    // would just duplicate it.
+    const active = project.scenes.find(
+      (s) => t >= s.start && t < s.start + s.duration,
+    );
+    if (active && active.kind === 'outro') {
+      captionsEl.style.display = 'none';
+      return;
+    }
     if (!allWords.length) {
       captionsEl.style.display = 'none';
       return;

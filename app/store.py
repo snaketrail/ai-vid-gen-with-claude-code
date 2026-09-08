@@ -50,7 +50,7 @@ def recompute_timeline(project: Project) -> Project:
     cursor = 0.0
     for scene in project.scenes:
         if scene.voice.duration > 0:
-            scene.duration = round(scene.voice.duration + VOICE_TAIL, 3)
+            scene.duration = round(scene.voice.duration + VOICE_TAIL + scene.hold, 3)
         elif scene.duration <= 0:
             scene.duration = DEFAULT_SCENE_DURATION
         scene.start = round(cursor, 3)

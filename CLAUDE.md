@@ -145,6 +145,31 @@ Notes that will save hours:
 - Build the audio track separately first (see 6.5), then mux once. Do not try
   to stream audio and video into the same pass.
 
+### 4.2b The branded outro is rendered once, not per video
+
+Every video ends with the same end card: the `stefdim.online` logo, the line
+*"Абонирайте се за stefdim.online за повече видеа."*, then a **1 second hold**
+before the video ends.
+
+Because it never varies, it is **not a scene**. Rendering its ~145 frames on
+every export would be pure waste. Instead `app/outro.py`:
+
+1. Renders it **once** through the normal player into `content/brand/outro.mp4`.
+2. Writes `outro.stamp.json` — a fingerprint of the logo bytes, the voice-over,
+   the text, the hold and the background colour.
+3. On later exports, rebuilds **only if that fingerprint changed**; otherwise
+   the cached clip is concatenated onto the freshly rendered body.
+
+Keep it this way. If the outro ever becomes per-video (a different URL per
+channel, say), it stops being cacheable and belongs back in the timeline.
+
+The concat re-encodes rather than stream-copying: `-c copy` across two
+separately encoded files is fragile and can desync audio.
+
+The background colour is sampled from the logo PNG itself (`#0e1527`) so the
+artwork's own plate is invisible against it. If the logo is replaced, resample
+it — a near-miss shows up as a visible rectangle.
+
 ### 4.3 Audio is assembled independently
 
 Voice-over clips are placed on a timeline with ffmpeg `adelay` + `amix`, plus an

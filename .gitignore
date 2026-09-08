@@ -4,3 +4,7 @@ __pycache__/
 .env
 projects/
 output/
+
+# The outro clip is a build artifact, rebuilt on demand from logo+VO.
+content/brand/outro.mp4
+content/brand/outro.stamp.json

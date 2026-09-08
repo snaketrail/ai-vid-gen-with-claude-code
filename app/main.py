@@ -20,6 +20,7 @@ from pydantic import BaseModel
 from . import assemble as assemble_mod
 from . import audio as audio_mod
 from . import export as export_mod
+from . import outro as outro_mod
 from . import store
 from .models import Project, Scene
 
@@ -137,12 +138,32 @@ def api_export(project_id: str) -> dict:
                 _jobs[job_id].update(progress=frac, message=msg)
 
         try:
-            on_progress(0.0, "Building audio")
+            # The branded outro is identical in every video, so it is rendered
+            # once and cached, then concatenated on. Only the first export
+            # after a branding change pays for it.
+            def outro_progress(f: float, msg: str) -> None:
+                on_progress(f * 0.35, msg)
+
+            outro_clip = outro_mod.ensure(
+                base_url=BASE_URL, on_progress=outro_progress
+            )
+
+            on_progress(0.36, "Building audio")
             audio_path = audio_mod.build(project)
+
+            def body_progress(f: float, msg: str) -> None:
+                on_progress(0.36 + f * 0.58, msg)
+
             out = export_mod.render(
                 project, base_url=BASE_URL, audio_path=audio_path,
-                on_progress=on_progress,
+                on_progress=body_progress if outro_clip else on_progress,
             )
+
+            if outro_clip:
+                on_progress(0.95, "Adding outro")
+                merged = store.OUTPUT_DIR / f"{project.id}_final.mp4"
+                outro_mod.append_to(out, merged)
+                merged.replace(out)
             with _jobs_lock:
                 _jobs[job_id].update(
                     status="done", progress=1.0,
