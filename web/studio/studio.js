@@ -362,10 +362,7 @@
         clearInterval(poll);
         status.className = 'status ok';
         status.textContent = j.message;
-        const v = $('result');
-        v.src = `/api/output/${PROJECT}?t=${Date.now()}`;
-        v.style.display = 'block';
-        $('resultCol').style.display = 'flex';
+        await loadExisting(`${PROJECT}.mp4`);
         others.forEach((b) => (b.disabled = false));
         // The scenes changed if this was a "make", so refresh everything.
         await loadProject();
@@ -396,19 +393,51 @@
     await reloadPlayer();
   });
 
-  /** Show the last rendered MP4, if there is one, on page load. */
-  async function loadExisting() {
-    const url = `/api/output/${PROJECT}`;
+  /** Populate the picker from the output folder and show the newest video. */
+  async function loadExisting(preferName) {
+    let videos = [];
     try {
-      const info = await (await fetch(`${url}/info`)).json();
-      if (!info.exists) return;
-      const v = $('result');
-      v.src = `${url}?t=${Date.now()}`;
-      v.style.display = 'block';
-      $('resultCol').style.display = 'flex';
-      $('exportStatus').textContent = 'Last render';
-    } catch (e) { /* nothing rendered yet */ }
+      videos = await (await fetch('/api/videos')).json();
+    } catch (e) { return; }
+    if (!videos.length) return;
+
+    const pick = $('videoPick');
+    const keep = preferName || pick.value;
+    pick.innerHTML = '';
+    for (const v of videos) {
+      const o = document.createElement('option');
+      o.value = v.name;
+      const when = new Date(v.mtime * 1000);
+      o.textContent = `${v.stem}  ·  ${when.toLocaleTimeString([], {
+        hour: '2-digit', minute: '2-digit',
+      })}`;
+      pick.appendChild(o);
+    }
+    // Keep the current selection across a refresh when it still exists.
+    pick.value = videos.some((v) => v.name === keep) ? keep : videos[0].name;
+
+    $('resultCol').style.display = 'flex';
+    showVideo(pick.value, videos);
   }
+
+  function showVideo(name, videos) {
+    const v = $('result');
+    v.src = `/api/video/${encodeURIComponent(name)}?t=${Date.now()}`;
+    v.style.display = 'block';
+    const info = (videos || []).find((x) => x.name === name);
+    $('videoMeta').textContent = info
+      ? `${(info.size / 1048576).toFixed(1)} MB`
+      : '';
+  }
+
+  $('videoPick').addEventListener('change', async (e) => {
+    const videos = await (await fetch('/api/videos')).json();
+    showVideo(e.target.value, videos);
+  });
+
+  $('revealBtn').addEventListener('click', () => {
+    fetch('/api/reveal', { method: 'POST' });
+  });
 
   // ---- health ---------------------------------------------------------
 

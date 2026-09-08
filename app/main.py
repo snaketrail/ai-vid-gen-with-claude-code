@@ -400,6 +400,44 @@ def api_job(job_id: str) -> dict:
     return job
 
 
+@app.get("/api/videos")
+def api_videos() -> list[dict]:
+    """Every rendered MP4 in the output folder, newest first."""
+    if not store.OUTPUT_DIR.exists():
+        return []
+    out = []
+    for f in store.OUTPUT_DIR.glob("*.mp4"):
+        st = f.stat()
+        out.append({
+            "name": f.name,
+            "stem": f.stem,
+            "size": st.st_size,
+            "mtime": st.st_mtime,
+        })
+    out.sort(key=lambda v: v["mtime"], reverse=True)
+    return out
+
+
+@app.get("/api/video/{name}")
+def api_video(name: str) -> FileResponse:
+    """Serve a rendered video by filename (not by project id)."""
+    target = (store.OUTPUT_DIR / name).resolve()
+    base = store.OUTPUT_DIR.resolve()
+    if not str(target).startswith(str(base)) or not target.exists():
+        raise HTTPException(404, "Not found")
+    return FileResponse(target, media_type="video/mp4")
+
+
+@app.post("/api/reveal")
+def api_reveal() -> dict:
+    """Open the output folder in Explorer."""
+    import subprocess
+
+    store.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    subprocess.Popen(["explorer", str(store.OUTPUT_DIR)])
+    return {"opened": str(store.OUTPUT_DIR)}
+
+
 @app.get("/api/output/{project_id}/info")
 def api_output_info(project_id: str) -> dict:
     """Whether a render exists, so the UI can show it on load."""

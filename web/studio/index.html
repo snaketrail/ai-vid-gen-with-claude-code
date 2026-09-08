@@ -21,8 +21,12 @@
         </div>
       </div>
       <div class="stage-col" id="resultCol">
-        <span class="stage-label">Exported MP4</span>
+        <div class="result-head">
+          <select id="videoPick" title="Rendered videos in the output folder"></select>
+          <button id="revealBtn" class="btn small" title="Open the output folder">📁</button>
+        </div>
         <video id="result" controls playsinline></video>
+        <span id="videoMeta" class="stage-label"></span>
       </div>
     </div>
     <div class="transport">

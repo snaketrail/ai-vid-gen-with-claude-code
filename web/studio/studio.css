@@ -238,3 +238,16 @@ main {
   object-fit: cover;
   max-height: 260px;
 }
+
+.result-head { display: flex; gap: 6px; width: 304px; }
+.result-head select {
+  flex: 1;
+  background: #171a21;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font: inherit;
+  font-size: 12px;
+  min-width: 0;
+}
