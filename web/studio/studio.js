@@ -21,11 +21,18 @@
   let playFrom = 0;       // timeline seconds at play start
   let saveTimer = null;
 
-  const dur = () => {
+  // Length of the editable scenes only.
+  const scenesDur = () => {
     if (!project || !project.scenes.length) return 0;
     const last = project.scenes[project.scenes.length - 1];
     return last.start + last.duration;
   };
+
+  // Full length of the exported video: the scenes plus the branded outro that
+  // is concatenated on at export. The scrubber spans this, so the timeline
+  // matches the finished MP4 rather than stopping short of it.
+  let outroDur = 0;
+  const dur = () => scenesDur() + outroDur;
 
   const playerWin = () => iframe.contentWindow;
 
@@ -37,15 +44,24 @@
 
   // ---- loading --------------------------------------------------------
 
+  async function loadOutroInfo() {
+    try {
+      const info = await (await fetch('/api/outro')).json();
+      outroDur = info.exists ? info.duration : 0;
+    } catch (e) { outroDur = 0; }
+  }
+
   async function loadProject() {
-    let res = await fetch(`/api/projects/${PROJECT}`);
+    // with_outro=false: the outro is presentation only, and saving it back
+    // would turn it into a real scene and double it at export.
+    let res = await fetch(`/api/projects/${PROJECT}?with_outro=false`);
     if (res.status === 404) {
       await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: PROJECT }),
       });
-      res = await fetch(`/api/projects/${PROJECT}`);
+      res = await fetch(`/api/projects/${PROJECT}?with_outro=false`);
     }
     project = await res.json();
   }
@@ -373,6 +389,7 @@
   // ---- boot -----------------------------------------------------------
 
   (async () => {
+    await loadOutroInfo();
     await loadProject();
     primeAudio();
     renderSceneList();

@@ -65,9 +65,46 @@ def is_current() -> bool:
 
 
 def duration() -> float:
+    """Length of the outro as it will actually appear in the export.
+
+    Prefer the rendered clip's real duration over VO+hold: the encoder pads to
+    whole frames, so the estimate is short by a few hundredths and the preview
+    timeline would not match the exported file.
+    """
     from .timing import audio_duration
 
+    if CLIP.exists():
+        try:
+            return audio_duration(CLIP)
+        except Exception:
+            pass
     return round((audio_duration(VO) if VO.exists() else 0.0) + HOLD, 3)
+
+
+def preview_scene() -> dict | None:
+    """The outro described as a scene, for the studio preview only.
+
+    The export still concatenates the cached clip; this exists so the
+    scrubber's timeline matches the exported file instead of ending early.
+    """
+    if not LOGO.exists():
+        return None
+    return {
+        "id": "sc_outro",
+        "kind": "outro",
+        "start": 0.0,
+        "duration": duration(),
+        "transition": "cut",
+        "image": {
+            "asset": "__brand__/logo.png",
+            "placeholder_color": BG,
+            "motion": {"type": "none", "amount": 1.0},
+            "status": "ready",
+            "locked": True,
+        },
+        "voice": {"text": TEXT, "duration": 0.0, "words": [], "status": "ready"},
+        "card": {"word": "", "looks_like": "", "actually": ""},
+    }
 
 
 def build_project() -> Project:

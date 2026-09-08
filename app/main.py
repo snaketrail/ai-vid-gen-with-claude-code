@@ -65,11 +65,27 @@ def api_create_project(body: CreateProject) -> dict:
 
 
 @app.get("/api/projects/{project_id}")
-def api_get_project(project_id: str) -> dict:
+def api_get_project(project_id: str, with_outro: bool = True) -> dict:
+    """The project as the player should draw it.
+
+    The branded outro is appended here rather than stored as a scene: it is a
+    fixed clip concatenated at export time, but the preview must include it or
+    the scrubber's timeline would be shorter than the exported video. The
+    studio's own editing calls pass with_outro=false so it never gets saved
+    back as real data.
+    """
     try:
-        return store.load(project_id).model_dump()
+        project = store.load(project_id)
     except FileNotFoundError:
         raise HTTPException(404, f"No such project: {project_id}")
+
+    data = project.model_dump()
+    if with_outro and project_id != outro_mod.BUILDER_ID:
+        extra = outro_mod.preview_scene()
+        if extra and project.scenes:
+            extra["start"] = project.total_duration()
+            data["scenes"] = data["scenes"] + [extra]
+    return data
 
 
 @app.put("/api/projects/{project_id}")
@@ -112,6 +128,16 @@ def api_assemble(project_id: str, body: AssembleReq) -> dict:
         project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
     )
     return p.model_dump()
+
+
+@app.get("/api/outro")
+def api_outro() -> dict:
+    """Outro length, so the studio scrubber can span the full export."""
+    return {
+        "exists": outro_mod.LOGO.exists(),
+        "duration": outro_mod.duration(),
+        "cached": outro_mod.is_current(),
+    }
 
 
 @app.get("/api/deck")
@@ -226,6 +252,15 @@ def api_output(project_id: str) -> FileResponse:
 
 
 # ---------------------------------------------------------------- media
+
+@app.get("/media/{project_id}/__brand__/{name}")
+def api_brand_media(project_id: str, name: str) -> FileResponse:
+    """Shared branding assets, not owned by any single project."""
+    target = (outro_mod.BRAND_DIR / name).resolve()
+    if not str(target).startswith(str(outro_mod.BRAND_DIR.resolve())) or not target.exists():
+        raise HTTPException(404, "Not found")
+    return FileResponse(target)
+
 
 @app.get("/media/{project_id}/{file_path:path}")
 def api_media(project_id: str, file_path: str) -> FileResponse:
