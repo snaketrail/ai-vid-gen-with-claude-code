@@ -17,6 +17,8 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from . import assemble as assemble_mod
+from . import audio as audio_mod
 from . import export as export_mod
 from . import store
 from .models import Project, Scene
@@ -91,6 +93,31 @@ def api_delete_scene(project_id: str, scene_id: str) -> dict:
     return store.save(project).model_dump()
 
 
+class AssembleReq(BaseModel):
+    count: int = 3
+    seed: int | None = None
+    intro: bool = True
+
+
+@app.post("/api/projects/{project_id}/assemble")
+def api_assemble(project_id: str, body: AssembleReq) -> dict:
+    """One click: build a full false-friends video from the deck."""
+    used: set[str] = set()
+    try:
+        used = assemble_mod.deck_ids_in(store.load(project_id))
+    except FileNotFoundError:
+        pass
+    p = assemble_mod.build(
+        project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
+    )
+    return p.model_dump()
+
+
+@app.get("/api/deck")
+def api_deck() -> list[dict]:
+    return assemble_mod.load_deck()
+
+
 # ---------------------------------------------------------------- export
 
 @app.post("/api/projects/{project_id}/export")
@@ -110,7 +137,12 @@ def api_export(project_id: str) -> dict:
                 _jobs[job_id].update(progress=frac, message=msg)
 
         try:
-            out = export_mod.render(project, base_url=BASE_URL, on_progress=on_progress)
+            on_progress(0.0, "Building audio")
+            audio_path = audio_mod.build(project)
+            out = export_mod.render(
+                project, base_url=BASE_URL, audio_path=audio_path,
+                on_progress=on_progress,
+            )
             with _jobs_lock:
                 _jobs[job_id].update(
                     status="done", progress=1.0,
@@ -122,6 +154,24 @@ def api_export(project_id: str) -> dict:
 
     threading.Thread(target=run, daemon=True).start()
     return {"job": job_id}
+
+
+@app.post("/api/projects/{project_id}/make")
+def api_make(project_id: str, body: AssembleReq) -> dict:
+    """The one button: assemble scenes from the deck, then render the MP4.
+
+    Only scenes whose voice-over already has audio get sound; lines without a
+    matching file are silent but still timed, so the video always completes.
+    """
+    used: set[str] = set()
+    try:
+        used = assemble_mod.deck_ids_in(store.load(project_id))
+    except FileNotFoundError:
+        pass
+    assemble_mod.build(
+        project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
+    )
+    return api_export(project_id)
 
 
 @app.get("/api/jobs/{job_id}")

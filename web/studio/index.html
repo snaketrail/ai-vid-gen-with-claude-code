@@ -22,7 +22,11 @@
       <span id="timeLabel" class="mono">0.00 / 0.00</span>
     </div>
     <div class="export-row">
-      <button id="exportBtn" class="btn primary">Export MP4</button>
+      <button id="makeBtn" class="btn primary big">Make video</button>
+      <label class="count">words
+        <input id="wordCount" type="number" min="1" max="6" value="5">
+      </label>
+      <button id="exportBtn" class="btn">Re-render only</button>
       <div id="exportStatus" class="status"></div>
     </div>
     <video id="result" controls playsinline></video>

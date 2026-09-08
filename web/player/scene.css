@@ -55,28 +55,57 @@ html, body {
   height: 100%;
 }
 
-/* ---- Overlay headline text ---- */
+/* ---- False-friend card (static for the whole scene) ---- */
 
-.overlay-text {
+.card {
   position: absolute;
-  left: 80px;
-  right: 80px;
+  left: 70px;
+  right: 70px;
+  /* Sit the card in the upper-middle so it and the captions frame the
+     screen, instead of leaving a dead band between them. */
+  top: 430px;
   font-family: 'Player', 'Segoe UI', system-ui, sans-serif;
-  font-weight: 900;
-  line-height: 1.08;
   text-align: center;
   color: #fff;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-  -webkit-text-stroke: 10px #000;
-  paint-order: stroke fill;
-  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
-  will-change: transform, opacity;
 }
 
-.overlay-text.pos-top    { top: 220px; }
-.overlay-text.pos-center { top: 50%; transform: translateY(-50%); }
-.overlay-text.pos-bottom { bottom: 620px; }
+.card-word {
+  font-size: 132px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 11px #000;
+  paint-order: stroke fill;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, .55);
+  margin-bottom: 68px;
+  word-break: break-word;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-size: 86px;
+  font-weight: 900;
+  line-height: 1.25;
+  margin: 30px 0;
+  -webkit-text-stroke: 8px #000;
+  paint-order: stroke fill;
+  text-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+}
+
+/* The trap reads as wrong, the truth as right — colour carries the meaning
+   even before the viewer reads the words. */
+.card-trap { color: #ff6b6b; text-decoration: line-through; text-decoration-thickness: 7px; }
+.card-true { color: #4ade80; }
+
+.card-row .tag {
+  -webkit-text-stroke: 6px #000;
+  font-size: 74px;
+  text-decoration: none;
+}
 
 /* ---- Captions ---- */
 

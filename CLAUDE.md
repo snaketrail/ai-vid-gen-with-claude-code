@@ -10,7 +10,8 @@
 ## 1. What this is
 
 A local studio for making **20–30 second vertical videos** (TikTok / YouTube
-Shorts, 1080×1920, 9:16).
+Shorts, 1080×1920, 9:16), specifically **English/Bulgarian "false friends"**
+explainers: one false friend per scene.
 
 **The core idea: the video is a web page.** There is no video model and no
 frame compositing in ffmpeg. A video is a stack of HTML elements — a background
@@ -62,9 +63,10 @@ OOM on 6 GB.
 | Preview | The composition page itself, in an iframe at 1080×1920, scaled down to fit. |
 | Export | **Playwright headless Chromium**, deterministic frame-by-frame seek + screenshot → piped to ffmpeg. |
 | Images | **ComfyUI HTTP API** at `http://127.0.0.1:8188`. User has a Pony model and a photorealism model. |
-| Voice-over | **ElevenLabs API**, `eleven_multilingual_v2` (best Bulgarian). Key from `.env`. |
-| Captions | **Word-level timings from ElevenLabs**, rendered as styled DOM, animated in CSS. |
-| Animation | **Preset menu per scene** (see 6.3). No freeform CSS editing in v1. |
+| Voice-over | **ElevenLabs**, `eleven_multilingual_v2`, voice **Georgi** (`31jwlwrRwpOA5yGuVAby`, native Bulgarian). Audio is generated through the user's Claude ElevenLabs connector and saved into the project as MP3 files. |
+| Captions | Word timings estimated from the real audio duration, weighted by syllable count (`app/timing.py`). Swap to ElevenLabs' `/with-timestamps` alignment if the app ever calls the API directly. |
+| Animation | Background motion presets per scene. The card is **static by design**; only captions move. |
+| Content | A **deck** of false friends in `content/false_friends.json`, auto-assembled into scenes. |
 | Backend | **FastAPI + uvicorn**, Python 3.12. |
 | Frontend | Vanilla JS + plain CSS. No React, no build step, no npm, no CDN. |
 | State | **One `project.json`** per project on disk. No database. |

@@ -7,7 +7,7 @@
 (() => {
   'use strict';
 
-  const PROJECT = 'demo';
+  const PROJECT = 'ff';
 
   const $ = (id) => document.getElementById(id);
   const iframe = $('player');
@@ -80,7 +80,6 @@
   // ---- scene list -----------------------------------------------------
 
   const MOTIONS = ['none', 'zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down'];
-  const ANIMS = ['none', 'fade_up', 'pop', 'slide_in'];
   const TRANSITIONS = ['cut', 'crossfade'];
 
   function select(value, options, onChange) {
@@ -139,23 +138,40 @@
         seek(t);
       });
 
-      const overlay = document.createElement('textarea');
-      overlay.value = scene.overlay.text;
-      overlay.placeholder = 'Headline text';
-      overlay.addEventListener('input', () => {
-        scene.overlay.text = overlay.value;
-        save();
-      });
-      card.appendChild(labelled('Overlay text', overlay));
+      const cw = document.createElement('input');
+      cw.type = 'text';
+      cw.value = scene.card.word;
+      cw.placeholder = 'ENGLISH WORD';
+      cw.addEventListener('input', () => { scene.card.word = cw.value; save(); });
+      card.appendChild(labelled('Word', cw));
+
+      const cl = document.createElement('input');
+      cl.type = 'text';
+      cl.value = scene.card.looks_like;
+      cl.placeholder = 'изглежда като…';
+      cl.addEventListener('input', () => { scene.card.looks_like = cl.value; save(); });
+      card.appendChild(labelled('Looks like (wrong)', cl));
+
+      const ca = document.createElement('input');
+      ca.type = 'text';
+      ca.value = scene.card.actually;
+      ca.placeholder = 'всъщност значи…';
+      ca.addEventListener('input', () => { scene.card.actually = ca.value; save(); });
+      card.appendChild(labelled('Actually means', ca));
 
       const vo = document.createElement('textarea');
       vo.value = scene.voice.text;
-      vo.placeholder = 'Voice-over line (Phase 2)';
-      vo.addEventListener('input', () => {
-        scene.voice.text = vo.value;
-        save();
-      });
+      vo.placeholder = 'Bulgarian voice-over line';
+      vo.addEventListener('input', () => { scene.voice.text = vo.value; save(); });
       card.appendChild(labelled('Voice-over', vo));
+
+      if (scene.voice.asset) {
+        const au = document.createElement('audio');
+        au.controls = true;
+        au.src = `/media/${PROJECT}/${scene.voice.asset}`;
+        au.style.width = '100%';
+        card.appendChild(au);
+      }
 
       const row = document.createElement('div');
       row.className = 'row';
@@ -173,9 +189,6 @@
       row.appendChild(select(scene.image.motion.type, MOTIONS, (v) => {
         scene.image.motion.type = v; save();
       }));
-      row.appendChild(select(scene.overlay.animation, ANIMS, (v) => {
-        scene.overlay.animation = v; save();
-      }));
       row.appendChild(select(scene.transition, TRANSITIONS, (v) => {
         scene.transition = v; save();
       }));
@@ -188,7 +201,7 @@
         const v = parseFloat(secs.value);
         if (!isNaN(v) && v > 0) { scene.duration = v; save(); }
       });
-      card.appendChild(labelled('Duration (s) — until voice exists', secs));
+      card.appendChild(labelled('Duration (s) — derived from voice when present', secs));
 
       list.appendChild(card);
     });
@@ -204,6 +217,7 @@
     if (t >= total) { t = total; stop(); }
     scrub.value = String(total ? t / total : 0);
     seek(t);
+    syncAudio(t);
     if (playing) requestAnimationFrame(tick);
   }
 
@@ -220,6 +234,7 @@
   function stop() {
     playing = false;
     playBtn.textContent = '▶';
+    stopAllAudio();
   }
 
   playBtn.addEventListener('click', () => (playing ? stop() : play()));
@@ -228,20 +243,60 @@
     seek(Number(scrub.value) * dur());
   });
 
+  // ---- preview audio --------------------------------------------------
+  // The player itself stays silent (it must be a pure function of time), so
+  // the studio plays the voice-over alongside it just for monitoring.
+
+  const voAudio = new Map();
+
+  function primeAudio() {
+    voAudio.clear();
+    for (const s of project.scenes) {
+      if (!s.voice.asset) continue;
+      const a = new Audio(`/media/${PROJECT}/${s.voice.asset}`);
+      a.preload = 'auto';
+      voAudio.set(s.id, a);
+    }
+  }
+
+  function stopAllAudio() {
+    for (const a of voAudio.values()) { a.pause(); }
+  }
+
+  /** Start/stop clips so what you hear matches the playhead. */
+  function syncAudio(t) {
+    for (const s of project.scenes) {
+      const a = voAudio.get(s.id);
+      if (!a) continue;
+      const local = t - s.start;
+      const inside = local >= 0 && local < (s.voice.duration || 0);
+      if (inside && a.paused) {
+        a.currentTime = Math.max(0, local);
+        a.play().catch(() => {});
+      } else if (!inside && !a.paused) {
+        a.pause();
+      }
+    }
+  }
+
   // ---- export ---------------------------------------------------------
 
-  $('exportBtn').addEventListener('click', async () => {
-    const btn = $('exportBtn');
+  async function runJob(url, btn, body) {
     const status = $('exportStatus');
-    btn.disabled = true;
+    const others = [$('makeBtn'), $('exportBtn')];
+    others.forEach((b) => (b.disabled = true));
     status.className = 'status';
     status.textContent = 'Starting…';
 
-    const res = await fetch(`/api/projects/${PROJECT}/export`, { method: 'POST' });
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {}),
+    });
     if (!res.ok) {
       status.className = 'status err';
       status.textContent = (await res.json()).detail || 'Failed to start';
-      btn.disabled = false;
+      others.forEach((b) => (b.disabled = false));
       return;
     }
     const { job } = await res.json();
@@ -256,14 +311,27 @@
         const v = $('result');
         v.src = `/api/output/${PROJECT}?t=${Date.now()}`;
         v.style.display = 'block';
-        btn.disabled = false;
+        others.forEach((b) => (b.disabled = false));
+        // The scenes changed if this was a "make", so refresh everything.
+        await loadProject();
+        primeAudio();
+        renderSceneList();
+        await reloadPlayer();
       } else if (j.status === 'error') {
         clearInterval(poll);
         status.className = 'status err';
         status.textContent = j.message;
-        btn.disabled = false;
+        others.forEach((b) => (b.disabled = false));
       }
     }, 500);
+  }
+
+  $('exportBtn').addEventListener('click', () =>
+    runJob(`/api/projects/${PROJECT}/export`, $('exportBtn')));
+
+  $('makeBtn').addEventListener('click', () => {
+    const count = Math.max(1, Math.min(6, Number($('wordCount').value) || 5));
+    runJob(`/api/projects/${PROJECT}/make`, $('makeBtn'), { count, intro: true });
   });
 
   $('addScene').addEventListener('click', async () => {
@@ -291,6 +359,7 @@
 
   (async () => {
     await loadProject();
+    primeAudio();
     renderSceneList();
     await reloadPlayer();
     await health();

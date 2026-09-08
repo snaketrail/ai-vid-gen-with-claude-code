@@ -8,6 +8,7 @@ Same code path, so the preview cannot drift from the export (CLAUDE.md 4.2).
 from __future__ import annotations
 
 import subprocess
+import threading
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -76,6 +77,13 @@ def render(
                 "--force-device-scale-factor=1",
                 "--hide-scrollbars",
                 "--disable-gpu",                # headless GPU raster is nondeterministic
+                # A long render is hundreds of full-page screenshots. Chromium's
+                # default shared-memory budget is far too small for that at
+                # 1080x1920 and the browser is killed part-way through, which
+                # surfaces here as a render that freezes mid-sequence.
+                "--disable-dev-shm-usage",
+                "--renderer-process-limit=1",
+                "--js-flags=--max-old-space-size=512",
             ],
         )
         try:
@@ -105,14 +113,35 @@ def render(
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
             )
-            assert proc.stdin is not None
+            assert proc.stdin is not None and proc.stderr is not None
+
+            # ffmpeg is chatty on stderr. Nothing reads that pipe during the
+            # frame loop, so once the OS buffer fills ffmpeg blocks on write,
+            # stops draining stdin, and the whole pipeline deadlocks — a
+            # render that freezes part-way with no error. Drain it in a
+            # background thread for the lifetime of the process.
+            stderr_chunks: list[bytes] = []
+
+            def drain_stderr() -> None:
+                for line in iter(proc.stderr.readline, b""):
+                    stderr_chunks.append(line)
+
+            stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
+            stderr_thread.start()
+
+            def ffmpeg_stderr() -> str:
+                stderr_thread.join(timeout=2)
+                return b"".join(stderr_chunks).decode("utf-8", "replace")
 
             try:
                 for frame in range(total_frames):
                     t = frame / fps
+                    # Bound every browser call: if Chromium dies the default is
+                    # to block indefinitely, which looks like a silent hang.
                     page.evaluate("(t) => window.seek(t)", t)
-                    png = page.screenshot(type="png")
+                    png = page.screenshot(type="png", timeout=20000)
                     proc.stdin.write(png)
+                    proc.stdin.flush()
 
                     if frame % 15 == 0 or frame == total_frames - 1:
                         progress(

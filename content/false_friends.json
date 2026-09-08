@@ -1,0 +1,285 @@
+{
+  "_comment": "Bulgarian/English false friends. 'word' is the English word; 'looks_like' is what a Bulgarian speaker assumes it means (the trap); 'actually' is the real meaning. 'vo' is the Bulgarian voice-over line for the scene. Edit freely — the assembler reads this file.",
+  "items": [
+    {
+      "id": "fabric",
+      "word": "FABRIC",
+      "looks_like": "фабрика",
+      "actually": "плат",
+      "vo": "Fabric не е фабрика. Означава плат. Фабриката е factory."
+    },
+    {
+      "id": "magazine",
+      "word": "MAGAZINE",
+      "looks_like": "магазин",
+      "actually": "списание",
+      "vo": "Magazine не е магазин. Означава списание. Магазинът е shop."
+    },
+    {
+      "id": "prospect",
+      "word": "PROSPECT",
+      "looks_like": "проспект",
+      "actually": "перспектива",
+      "vo": "Prospect не е проспект. Означава перспектива или възможност."
+    },
+    {
+      "id": "accord",
+      "word": "ACCORD",
+      "looks_like": "акорд",
+      "actually": "споразумение",
+      "vo": "Accord не е музикален акорд. Означава споразумение."
+    },
+    {
+      "id": "actual",
+      "word": "ACTUAL",
+      "looks_like": "актуален",
+      "actually": "действителен",
+      "vo": "Actual не значи актуален. Означава действителен, истински."
+    },
+    {
+      "id": "biscuit",
+      "word": "BISCUIT",
+      "looks_like": "бисквита",
+      "actually": "бисквита или питка",
+      "vo": "В Америка biscuit не е бисквита, а солена питка."
+    },
+    {
+      "id": "brilliant",
+      "word": "BRILLIANT",
+      "looks_like": "брилянт",
+      "actually": "блестящ",
+      "vo": "Brilliant не е брилянт. Означава блестящ или страхотен."
+    },
+    {
+      "id": "cabinet",
+      "word": "CABINET",
+      "looks_like": "кабинет",
+      "actually": "шкаф",
+      "vo": "Cabinet не е кабинет. Най-често означава шкаф."
+    },
+    {
+      "id": "concourse",
+      "word": "CONCOURSE",
+      "looks_like": "конкурс",
+      "actually": "голяма зала",
+      "vo": "Concourse не е конкурс. Означава голяма зала на летище или гара."
+    },
+    {
+      "id": "criminal",
+      "word": "CRIMINAL",
+      "looks_like": "криминален",
+      "actually": "престъпник",
+      "vo": "Criminal най-често означава престъпник, а не криминален жанр."
+    },
+    {
+      "id": "decoration",
+      "word": "DECORATION",
+      "looks_like": "декорация",
+      "actually": "украса или орден",
+      "vo": "Decoration може да значи орден за храброст, не само украса."
+    },
+    {
+      "id": "familiar",
+      "word": "FAMILIAR",
+      "looks_like": "фамилиарен",
+      "actually": "познат",
+      "vo": "Familiar не е фамилиарен. Означава познат, добре известен."
+    },
+    {
+      "id": "genial",
+      "word": "GENIAL",
+      "looks_like": "гениален",
+      "actually": "любезен",
+      "vo": "Genial не е гениален. Означава любезен и приветлив."
+    },
+    {
+      "id": "intelligent",
+      "word": "INTELLIGENT",
+      "looks_like": "интелигентен",
+      "actually": "умен",
+      "vo": "Intelligent значи умен. Интелигентен в нашия смисъл е cultured."
+    },
+    {
+      "id": "list",
+      "word": "LIST",
+      "looks_like": "лист",
+      "actually": "списък",
+      "vo": "List не е лист хартия. Означава списък. Листът е sheet."
+    },
+    {
+      "id": "marmalade",
+      "word": "MARMALADE",
+      "looks_like": "мармалад",
+      "actually": "конфитюр от цитруси",
+      "vo": "Marmalade е конфитюр само от цитруси, не всякакъв мармалад."
+    },
+    {
+      "id": "novel",
+      "word": "NOVEL",
+      "looks_like": "новела",
+      "actually": "роман",
+      "vo": "Novel не е новела. Означава роман."
+    },
+    {
+      "id": "occupation",
+      "word": "OCCUPATION",
+      "looks_like": "окупация",
+      "actually": "професия",
+      "vo": "Occupation обикновено значи професия, а не окупация."
+    },
+    {
+      "id": "paragraph",
+      "word": "PARAGRAPH",
+      "looks_like": "параграф",
+      "actually": "абзац",
+      "vo": "Paragraph не е параграф в закон. Означава абзац."
+    },
+    {
+      "id": "receipt",
+      "word": "RECEIPT",
+      "looks_like": "рецепта",
+      "actually": "касова бележка",
+      "vo": "Receipt не е рецепта. Означава касова бележка. Рецептата е recipe."
+    },
+    {
+      "id": "replica",
+      "word": "REPLICA",
+      "looks_like": "реплика",
+      "actually": "копие",
+      "vo": "Replica не е реплика в разговор. Означава точно копие."
+    },
+    {
+      "id": "scholar",
+      "word": "SCHOLAR",
+      "looks_like": "ученик",
+      "actually": "учен",
+      "vo": "Scholar не е ученик. Означава учен или изследовател."
+    },
+    {
+      "id": "sympathy",
+      "word": "SYMPATHY",
+      "looks_like": "симпатия",
+      "actually": "съчувствие",
+      "vo": "Sympathy не е симпатия. Означава съчувствие."
+    },
+    {
+      "id": "transpire",
+      "word": "TRANSPIRE",
+      "looks_like": "транспортирам",
+      "actually": "оказва се",
+      "vo": "Transpire означава оказва се, че. Няма нищо общо с транспорт."
+    },
+    {
+      "id": "velvet",
+      "word": "VELVET",
+      "looks_like": "велур",
+      "actually": "кадифе",
+      "vo": "Velvet не е велур. Означава кадифе."
+    },
+    {
+      "id": "artist",
+      "word": "ARTIST",
+      "looks_like": "артист",
+      "actually": "художник",
+      "vo": "Artist най-често значи художник, а не театрален артист."
+    },
+    {
+      "id": "academic",
+      "word": "ACADEMIC",
+      "looks_like": "академик",
+      "actually": "университетски",
+      "vo": "Academic значи университетски или научен, не академик."
+    },
+    {
+      "id": "data",
+      "word": "DATA",
+      "looks_like": "дата",
+      "actually": "данни",
+      "vo": "Data не е дата. Означава данни. Датата е date."
+    },
+    {
+      "id": "dramatic",
+      "word": "DRAMATIC",
+      "looks_like": "драматичен",
+      "actually": "рязък",
+      "vo": "Dramatic често значи рязък или значителен, не само драматичен."
+    },
+    {
+      "id": "figure",
+      "word": "FIGURE",
+      "looks_like": "фигура",
+      "actually": "число",
+      "vo": "Figure много често означава число или цифра."
+    },
+    {
+      "id": "gymnasium",
+      "word": "GYMNASIUM",
+      "looks_like": "гимназия",
+      "actually": "физкултурен салон",
+      "vo": "Gymnasium не е гимназия. Означава физкултурен салон."
+    },
+    {
+      "id": "lecture",
+      "word": "LECTURE",
+      "looks_like": "лекция",
+      "actually": "лекция или конско",
+      "vo": "Lecture може да значи и конско, не само лекция."
+    },
+    {
+      "id": "physician",
+      "word": "PHYSICIAN",
+      "looks_like": "физик",
+      "actually": "лекар",
+      "vo": "Physician не е физик. Означава лекар. Физикът е physicist."
+    },
+    {
+      "id": "preservative",
+      "word": "PRESERVATIVE",
+      "looks_like": "презерватив",
+      "actually": "консервант",
+      "vo": "Preservative значи консервант в храната. Внимавай с тази дума."
+    },
+    {
+      "id": "principal",
+      "word": "PRINCIPAL",
+      "looks_like": "принципен",
+      "actually": "главен",
+      "vo": "Principal значи главен или директор, не принципен."
+    },
+    {
+      "id": "protection",
+      "word": "PROTECTION",
+      "looks_like": "протекция",
+      "actually": "защита",
+      "vo": "Protection означава защита, а не протекция по познанство."
+    },
+    {
+      "id": "pretend",
+      "word": "PRETEND",
+      "looks_like": "претендирам",
+      "actually": "преструвам се",
+      "vo": "Pretend не е претендирам. Означава преструвам се."
+    },
+    {
+      "id": "resume",
+      "word": "RESUME",
+      "looks_like": "резюме",
+      "actually": "възобновявам",
+      "vo": "Resume като глагол значи възобновявам."
+    },
+    {
+      "id": "student",
+      "word": "STUDENT",
+      "looks_like": "студент",
+      "actually": "ученик или студент",
+      "vo": "Student е всеки учащ, включително ученик в училище."
+    },
+    {
+      "id": "trap",
+      "word": "TRAP",
+      "looks_like": "трап",
+      "actually": "капан",
+      "vo": "Trap не е трап на пътя. Означава капан."
+    }
+  ]
+}

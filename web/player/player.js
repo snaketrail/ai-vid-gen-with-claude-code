@@ -23,7 +23,7 @@
   const stage = document.getElementById('stage');
 
   let project = null;
-  /** @type {Map<string, {root: HTMLElement, bg: HTMLElement, overlay: HTMLElement}>} */
+  /** @type {Map<string, {root: HTMLElement, bg: HTMLElement, scene: object}>} */
   const sceneEls = new Map();
   let captionsEl = null;
 
@@ -31,11 +31,6 @@
 
   function easeInOutCubic(p) {
     return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-  }
-
-  function easeOutBack(p) {
-    const c1 = 1.70158, c3 = c1 + 1;
-    return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
   }
 
   const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -52,25 +47,6 @@
     pan_right: (p) => `scale(1.14) translateX(${(p - 0.5) * 5}%)`,
     pan_up:    (p) => `scale(1.14) translateY(${(0.5 - p) * 5}%)`,
     pan_down:  (p) => `scale(1.14) translateY(${(p - 0.5) * 5}%)`,
-  };
-
-  // Overlay text animations, as a function of local scene time (seconds).
-  // All complete early and then hold, so most of a scene is static.
-  const OVERLAY_ANIM = {
-    none: () => ({ opacity: 1, transform: '' }),
-    fade_up: (lt) => {
-      const p = easeInOutCubic(clamp01(lt / 0.4));
-      return { opacity: p, transform: `translateY(${(1 - p) * 30}px)` };
-    },
-    pop: (lt) => {
-      const p = clamp01(lt / 0.45);
-      const s = 0.8 + (easeOutBack(p) * 0.2);
-      return { opacity: clamp01(lt / 0.2), transform: `scale(${s})` };
-    },
-    slide_in: (lt) => {
-      const p = easeInOutCubic(clamp01(lt / 0.45));
-      return { opacity: p, transform: `translateX(${(1 - p) * -60}px)` };
-    },
   };
 
   // ---- build ----------------------------------------------------------
@@ -95,14 +71,33 @@
     }
     root.appendChild(bg);
 
-    const overlay = document.createElement('div');
-    overlay.className = `overlay-text pos-${(scene.overlay && scene.overlay.position) || 'top'}`;
-    overlay.textContent = (scene.overlay && scene.overlay.text) || '';
-    overlay.style.fontSize = `${(scene.overlay && scene.overlay.font_size) || 96}px`;
-    root.appendChild(overlay);
+    // The false-friend card: static for the whole scene. Only the captions
+    // move — deliberate, so the word stays readable while the VO plays.
+    const card = document.createElement('div');
+    card.className = 'card';
+    const c = scene.card || {};
+    if (c.word) {
+      const w = document.createElement('div');
+      w.className = 'card-word';
+      w.textContent = c.word;
+      card.appendChild(w);
+    }
+    if (c.looks_like) {
+      const l = document.createElement('div');
+      l.className = 'card-row card-trap';
+      l.innerHTML = `<span class="tag">✗</span><span>${c.looks_like}</span>`;
+      card.appendChild(l);
+    }
+    if (c.actually) {
+      const a = document.createElement('div');
+      a.className = 'card-row card-true';
+      a.innerHTML = `<span class="tag">✓</span><span>${c.actually}</span>`;
+      card.appendChild(a);
+    }
+    root.appendChild(card);
 
     stage.appendChild(root);
-    sceneEls.set(scene.id, { root, bg, overlay, scene });
+    sceneEls.set(scene.id, { root, bg, scene });
   }
 
   function build() {
@@ -175,16 +170,13 @@
   // ---- seek -----------------------------------------------------------
 
   /**
-   * @param entry   scene DOM handles
-   * @param lt      local scene time in seconds
-   * @param opacity scene-level opacity (crossfade)
-   * @param introAt time used to drive the overlay intro animation. During a
-   *   crossfade the scene is already on screen before its own start time, so
-   *   the intro must run on the transition's clock; passing it separately
-   *   keeps that continuous across the boundary instead of restarting.
+   * The card is static for the whole scene, so a scene's appearance depends
+   * only on its own local time and its crossfade opacity. That removes the
+   * intro-clock the animated overlay needed, and with it a class of
+   * transition bugs.
    */
-  function applyScene(entry, lt, opacity, introAt) {
-    const { root, bg, overlay, scene } = entry;
+  function applyScene(entry, lt, opacity) {
+    const { root, bg, scene } = entry;
     root.style.display = 'block';
     root.style.opacity = String(opacity);
 
@@ -193,16 +185,6 @@
     const motion = (scene.image && scene.image.motion) || { type: 'zoom_in', amount: 1.12 };
     const fn = MOTION[motion.type] || MOTION.none;
     bg.style.transform = fn(p, motion.amount || 1.12);
-
-    const animName = (scene.overlay && scene.overlay.animation) || 'none';
-    const anim = (OVERLAY_ANIM[animName] || OVERLAY_ANIM.none)(
-      introAt === undefined ? lt : introAt,
-    );
-    overlay.style.opacity = String(anim.opacity);
-    // pos-center already uses translateY(-50%); compose rather than clobber it.
-    const base = (scene.overlay && scene.overlay.position) === 'center'
-      ? 'translateY(-50%) ' : '';
-    overlay.style.transform = base + (anim.transform || '');
   }
 
   function seek(t) {
@@ -233,20 +215,13 @@
           // Outgoing scene keeps animating while fading out.
           applyScene(entry, lt, 1 - fp);
           // The incoming scene overlaps backwards into the outgoing scene's
-          // time, so `t - next.start` is negative through the whole fade.
-          // Feeding that to the overlay animation would leave its text at
-          // opacity 0 until after the transition finished — a bare background
-          // mid-crossfade. Drive the intro on the transition clock instead
-          // (0 at the start of the fade), which continues seamlessly into the
-          // scene's own time once it stands alone.
-          applyScene(sceneEls.get(next.id), t - next.start, fp, t - fadeStart);
+          // time, so its local time is negative here; the motion easing
+          // clamps it, and the card is static, so this is well-defined.
+          applyScene(sceneEls.get(next.id), t - next.start, fp);
           break;
         }
       }
-      // If this scene faded in, its intro already began CROSSFADE seconds
-      // before its start time. Continue that same clock so the animation does
-      // not restart at the boundary.
-      applyScene(entry, lt, 1, s.transition === 'crossfade' ? lt + CROSSFADE : lt);
+      applyScene(entry, lt, 1);
       break;
     }
 

@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 MotionType = Literal[
     "none", "zoom_in", "zoom_out", "pan_left", "pan_right", "pan_up", "pan_down"
 ]
-OverlayAnim = Literal["none", "fade_up", "pop", "slide_in"]
 Transition = Literal["cut", "crossfade"]
 AssetStatus = Literal["empty", "stale", "generating", "ready", "error"]
 
@@ -55,11 +54,16 @@ class VoiceAsset(BaseModel):
     locked: bool = False
 
 
-class Overlay(BaseModel):
-    text: str = ""
-    position: Literal["top", "center", "bottom"] = "top"
-    font_size: int = 96
-    animation: OverlayAnim = "fade_up"
+class Card(BaseModel):
+    """The static false-friend card shown for the whole scene.
+
+    Deliberately not animated: only the captions move (user requirement).
+    Rendered as one block so the viewer can read it at a glance.
+    """
+
+    word: str = ""          # the English word, e.g. "MAGAZINE"
+    looks_like: str = ""    # the trap, e.g. "магазин"
+    actually: str = ""      # the truth, e.g. "списание"
 
 
 class Scene(BaseModel):
@@ -71,7 +75,7 @@ class Scene(BaseModel):
     transition: Transition = "cut"
     image: ImageAsset = Field(default_factory=ImageAsset)
     voice: VoiceAsset = Field(default_factory=VoiceAsset)
-    overlay: Overlay = Field(default_factory=Overlay)
+    card: Card = Field(default_factory=Card)
 
 
 class Settings(BaseModel):
