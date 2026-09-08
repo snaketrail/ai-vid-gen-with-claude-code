@@ -173,8 +173,10 @@ def ensure(
 
     project = build_project()
     mix = audio_mod.build(project)
+    # Fixed filename: this is a cached build artifact, not a dated deliverable.
     out = export_mod.render(
-        project, base_url=base_url, audio_path=mix, on_progress=on_progress
+        project, base_url=base_url, audio_path=mix, on_progress=on_progress,
+        out_path=store.OUTPUT_DIR / "_outro_build.mp4",
     )
 
     BRAND_DIR.mkdir(parents=True, exist_ok=True)

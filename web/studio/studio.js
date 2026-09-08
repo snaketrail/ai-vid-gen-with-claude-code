@@ -362,7 +362,7 @@
         clearInterval(poll);
         status.className = 'status ok';
         status.textContent = j.message;
-        await loadExisting(`${PROJECT}.mp4`);
+        await loadExisting();
         others.forEach((b) => (b.disabled = false));
         // The scenes changed if this was a "make", so refresh everything.
         await loadProject();

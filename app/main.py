@@ -276,7 +276,7 @@ def api_export(project_id: str) -> dict:
 
             if outro_clip:
                 on_progress(0.95, "Adding outro")
-                merged = store.OUTPUT_DIR / f"{project.id}_final.mp4"
+                merged = out.with_name(out.stem + "_tmp.mp4")
                 outro_mod.append_to(out, merged)
                 merged.replace(out)
             with _jobs_lock:
@@ -379,7 +379,7 @@ def api_make_with_images(project_id: str) -> dict:
             )
             if outro_clip:
                 set_job(progress=0.96, message="Adding outro")
-                merged = store.OUTPUT_DIR / f"{project_id}_final.mp4"
+                merged = out.with_name(out.stem + "_tmp.mp4")
                 outro_mod.append_to(out, merged)
                 merged.replace(out)
 
@@ -407,6 +407,8 @@ def api_videos() -> list[dict]:
         return []
     out = []
     for f in store.OUTPUT_DIR.glob("*.mp4"):
+        if f.stem.startswith("_"):
+            continue  # internal build artifacts
         st = f.stat()
         out.append({
             "name": f.name,
@@ -438,11 +440,24 @@ def api_reveal() -> dict:
     return {"opened": str(store.OUTPUT_DIR)}
 
 
+def _latest_render(project_id: str) -> Path | None:
+    """Newest MP4 for a project, now that filenames carry a timestamp."""
+    files = sorted(
+        store.OUTPUT_DIR.glob(f"{project_id}-*.mp4"),
+        key=lambda f: f.stat().st_mtime,
+        reverse=True,
+    )
+    if not files:
+        legacy = store.OUTPUT_DIR / f"{project_id}.mp4"
+        return legacy if legacy.exists() else None
+    return files[0]
+
+
 @app.get("/api/output/{project_id}/info")
 def api_output_info(project_id: str) -> dict:
     """Whether a render exists, so the UI can show it on load."""
-    path = store.OUTPUT_DIR / f"{project_id}.mp4"
-    if not path.exists():
+    path = _latest_render(project_id)
+    if path is None:
         return {"exists": False}
     return {
         "exists": True,
@@ -453,8 +468,8 @@ def api_output_info(project_id: str) -> dict:
 
 @app.get("/api/output/{project_id}")
 def api_output(project_id: str) -> FileResponse:
-    path = store.OUTPUT_DIR / f"{project_id}.mp4"
-    if not path.exists():
+    path = _latest_render(project_id)
+    if path is None:
         raise HTTPException(404, "Not rendered yet")
     return FileResponse(path, media_type="video/mp4")
 

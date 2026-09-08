@@ -43,11 +43,19 @@ def _ffmpeg_cmd(fps: int, out_path: Path, audio_path: Optional[Path]) -> list[st
     return cmd
 
 
+def output_name(project_id: str) -> str:
+    """Timestamped filename, so a new render never overwrites an old video."""
+    from datetime import datetime
+
+    return f"{project_id}-{datetime.now().strftime('%Y-%m-%d-%H%M')}.mp4"
+
+
 def render(
     project: Project,
     base_url: str = "http://127.0.0.1:8000",
     audio_path: Optional[Path] = None,
     on_progress: Optional[ProgressFn] = None,
+    out_path: Optional[Path] = None,
 ) -> Path:
     """Render the project to MP4. Returns the output path."""
     from playwright.sync_api import sync_playwright
@@ -62,7 +70,8 @@ def render(
     total_frames = max(1, int(round(duration * fps)))
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = OUTPUT_DIR / f"{project.id}.mp4"
+    if out_path is None:
+        out_path = OUTPUT_DIR / output_name(project.id)
 
     def progress(frac: float, msg: str) -> None:
         if on_progress:
