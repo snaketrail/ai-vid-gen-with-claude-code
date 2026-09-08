@@ -311,6 +311,7 @@
         const v = $('result');
         v.src = `/api/output/${PROJECT}?t=${Date.now()}`;
         v.style.display = 'block';
+        $('resultCol').style.display = 'flex';
         others.forEach((b) => (b.disabled = false));
         // The scenes changed if this was a "make", so refresh everything.
         await loadProject();
@@ -341,6 +342,20 @@
     await reloadPlayer();
   });
 
+  /** Show the last rendered MP4, if there is one, on page load. */
+  async function loadExisting() {
+    const url = `/api/output/${PROJECT}`;
+    try {
+      const info = await (await fetch(`${url}/info`)).json();
+      if (!info.exists) return;
+      const v = $('result');
+      v.src = `${url}?t=${Date.now()}`;
+      v.style.display = 'block';
+      $('resultCol').style.display = 'flex';
+      $('exportStatus').textContent = 'Last render';
+    } catch (e) { /* nothing rendered yet */ }
+  }
+
   // ---- health ---------------------------------------------------------
 
   async function health() {
@@ -362,6 +377,7 @@
     primeAudio();
     renderSceneList();
     await reloadPlayer();
+    await loadExisting();
     await health();
   })();
 })();

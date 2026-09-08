@@ -96,12 +96,31 @@ main {
 .status.err { color: var(--err); }
 .status.ok { color: var(--ok); }
 
+/* The finished MP4 sits beside the live preview, same height, so you can
+   compare what you are editing against what was actually exported. */
 #result {
   width: 304px;
+  height: 540px;
   border-radius: 10px;
   display: none;
   border: 1px solid var(--line);
+  background: #000;
 }
+
+.stages {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.stage-col { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.stage-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+#resultCol { display: none; }
 
 /* ---- scenes ---- */
 

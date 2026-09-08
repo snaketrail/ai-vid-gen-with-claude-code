@@ -13,8 +13,17 @@
 
 <main>
   <section class="preview-pane">
-    <div class="stage-wrap">
-      <iframe id="player" src="about:blank" scrolling="no"></iframe>
+    <div class="stages">
+      <div class="stage-col">
+        <span class="stage-label">Live preview</span>
+        <div class="stage-wrap">
+          <iframe id="player" src="about:blank" scrolling="no"></iframe>
+        </div>
+      </div>
+      <div class="stage-col" id="resultCol">
+        <span class="stage-label">Exported MP4</span>
+        <video id="result" controls playsinline></video>
+      </div>
     </div>
     <div class="transport">
       <button id="playBtn" class="btn">▶</button>
@@ -29,7 +38,6 @@
       <button id="exportBtn" class="btn">Re-render only</button>
       <div id="exportStatus" class="status"></div>
     </div>
-    <video id="result" controls playsinline></video>
   </section>
 
   <section class="scenes-pane">

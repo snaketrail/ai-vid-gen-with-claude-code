@@ -204,6 +204,19 @@ def api_job(job_id: str) -> dict:
     return job
 
 
+@app.get("/api/output/{project_id}/info")
+def api_output_info(project_id: str) -> dict:
+    """Whether a render exists, so the UI can show it on load."""
+    path = store.OUTPUT_DIR / f"{project_id}.mp4"
+    if not path.exists():
+        return {"exists": False}
+    return {
+        "exists": True,
+        "size": path.stat().st_size,
+        "mtime": path.stat().st_mtime,
+    }
+
+
 @app.get("/api/output/{project_id}")
 def api_output(project_id: str) -> FileResponse:
     path = store.OUTPUT_DIR / f"{project_id}.mp4"
