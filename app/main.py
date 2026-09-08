@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 from . import assemble as assemble_mod
 from . import audio as audio_mod
+from . import comfy as comfy_mod
 from . import export as export_mod
 from . import outro as outro_mod
 from . import store
@@ -45,7 +46,7 @@ def health() -> dict:
     return {
         "ffmpeg": shutil.which("ffmpeg") is not None,
         "ffprobe": shutil.which("ffprobe") is not None,
-        "comfy": False,       # Phase 3
+        "comfy": comfy_mod.health(),
         "elevenlabs": False,  # Phase 2
     }
 
@@ -128,6 +129,94 @@ def api_assemble(project_id: str, body: AssembleReq) -> dict:
         project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
     )
     return p.model_dump()
+
+
+@app.get("/api/checkpoints")
+def api_checkpoints() -> list[str]:
+    return comfy_mod.checkpoints()
+
+
+@app.post("/api/projects/{project_id}/images")
+def api_generate_images(project_id: str, scene_id: str | None = None) -> dict:
+    """Generate the missing (or one specific) scene image via ComfyUI.
+
+    Runs strictly one at a time: two parallel generations OOM on 6 GB VRAM.
+    """
+    project = store.load(project_id)
+    job_id = f"images_{project_id}"
+
+    with _jobs_lock:
+        if _jobs.get(job_id, {}).get("status") == "running":
+            raise HTTPException(409, "Image generation already running.")
+        _jobs[job_id] = {"status": "running", "progress": 0.0, "message": "Starting"}
+
+    def run() -> None:
+        try:
+            targets = [
+                s for s in project.scenes
+                if s.image.prompt
+                and not s.image.locked
+                and (scene_id is None or s.id == scene_id)
+                and (scene_id is not None or s.image.status != "ready")
+            ]
+            if not targets:
+                with _jobs_lock:
+                    _jobs[job_id].update(
+                        status="done", progress=1.0, message="Nothing to generate"
+                    )
+                return
+
+            import random
+
+            for i, scene in enumerate(targets):
+                seed = scene.image.seed or random.randint(1, 2**31 - 1)
+                if scene_id is not None:
+                    seed = random.randint(1, 2**31 - 1)  # re-roll
+
+                h = store.short_hash(
+                    scene.image.prompt, seed, project.settings.checkpoint,
+                    project.settings.negative_prompt,
+                    comfy_mod.GEN_WIDTH, comfy_mod.GEN_HEIGHT,
+                )
+                name = f"{scene.id}_img_{h}.png"
+                dest = store.assets_dir(project_id) / name
+
+                base = i / len(targets)
+                span = 1 / len(targets)
+
+                def prog(f: float, msg: str, _b=base, _s=span, _sc=scene) -> None:
+                    with _jobs_lock:
+                        _jobs[job_id].update(
+                            progress=_b + f * _s,
+                            message=f"{_sc.id}: {msg}",
+                        )
+
+                if not dest.exists():   # cache hit: nothing to do
+                    comfy_mod.generate(
+                        scene.image.prompt, seed, dest,
+                        checkpoint=project.settings.checkpoint
+                        or "photon_v1.safetensors",
+                        negative=project.settings.negative_prompt,
+                        on_progress=prog,
+                    )
+
+                scene.image.seed = seed
+                scene.image.asset = f"assets/{name}"
+                scene.image.hash = h
+                scene.image.status = "ready"
+                store.save(project)
+
+            with _jobs_lock:
+                _jobs[job_id].update(
+                    status="done", progress=1.0,
+                    message=f"Generated {len(targets)} image(s)",
+                )
+        except Exception as e:
+            with _jobs_lock:
+                _jobs[job_id].update(status="error", message=str(e))
+
+    threading.Thread(target=run, daemon=True).start()
+    return {"job": job_id}
 
 
 @app.get("/api/outro")
@@ -218,7 +307,88 @@ def api_make(project_id: str, body: AssembleReq) -> dict:
     assemble_mod.build(
         project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
     )
+    # Generate images first if ComfyUI is available, then render. Without it
+    # the flat placeholder colours are used, so a video still comes out.
+    if comfy_mod.health():
+        return api_make_with_images(project_id)
     return api_export(project_id)
+
+
+def api_make_with_images(project_id: str) -> dict:
+    """Generate all missing images, then export — as one job."""
+    job_id = f"export_{project_id}"
+    with _jobs_lock:
+        if _jobs.get(job_id, {}).get("status") == "running":
+            raise HTTPException(409, "A render is already running.")
+        _jobs[job_id] = {"status": "running", "progress": 0.0, "message": "Starting"}
+
+    def run() -> None:
+        import random
+
+        def set_job(**kw: Any) -> None:
+            with _jobs_lock:
+                _jobs[job_id].update(**kw)
+
+        try:
+            project = store.load(project_id)
+            targets = [
+                s for s in project.scenes
+                if s.image.prompt and not s.image.locked and s.image.status != "ready"
+            ]
+            for i, scene in enumerate(targets):
+                seed = scene.image.seed or random.randint(1, 2**31 - 1)
+                h = store.short_hash(
+                    scene.image.prompt, seed, project.settings.checkpoint,
+                    project.settings.negative_prompt,
+                    comfy_mod.GEN_WIDTH, comfy_mod.GEN_HEIGHT,
+                )
+                name = f"{scene.id}_img_{h}.png"
+                dest = store.assets_dir(project_id) / name
+                base, span = i / max(1, len(targets)), 1 / max(1, len(targets))
+
+                def prog(f: float, msg: str, _b=base, _s=span, _sc=scene) -> None:
+                    set_job(
+                        progress=(_b + f * _s) * 0.55,
+                        message=f"Image {_sc.id}: {int(f * 100)}%",
+                    )
+
+                if not dest.exists():
+                    comfy_mod.generate(
+                        scene.image.prompt, seed, dest,
+                        checkpoint=project.settings.checkpoint
+                        or "photon_v1.safetensors",
+                        negative=project.settings.negative_prompt,
+                        on_progress=prog,
+                    )
+                scene.image.seed = seed
+                scene.image.asset = f"assets/{name}"
+                scene.image.hash = h
+                scene.image.status = "ready"
+                store.save(project)
+
+            project = store.load(project_id)
+            outro_clip = outro_mod.ensure(base_url=BASE_URL)
+            set_job(progress=0.58, message="Building audio")
+            audio_path = audio_mod.build(project)
+
+            out = export_mod.render(
+                project, base_url=BASE_URL, audio_path=audio_path,
+                on_progress=lambda f, m: set_job(
+                    progress=0.58 + f * 0.37, message=m
+                ),
+            )
+            if outro_clip:
+                set_job(progress=0.96, message="Adding outro")
+                merged = store.OUTPUT_DIR / f"{project_id}_final.mp4"
+                outro_mod.append_to(out, merged)
+                merged.replace(out)
+
+            set_job(status="done", progress=1.0, message=f"Done: {out.name}")
+        except Exception as e:
+            set_job(status="error", message=str(e))
+
+    threading.Thread(target=run, daemon=True).start()
+    return {"job": job_id}
 
 
 @app.get("/api/jobs/{job_id}")

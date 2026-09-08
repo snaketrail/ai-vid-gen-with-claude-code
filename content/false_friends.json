@@ -1,285 +1,325 @@
 {
-  "_comment": "Bulgarian/English false friends. 'word' is the English word; 'looks_like' is what a Bulgarian speaker assumes it means (the trap); 'actually' is the real meaning. 'vo' is the Bulgarian voice-over line for the scene. Edit freely — the assembler reads this file.",
+  "_comment": "Bulgarian/English false friends. 'word' is the English word; 'looks_like' is what a Bulgarian speaker assumes it means (the trap); 'actually' is the real meaning. 'vo' is the Bulgarian voice-over line for the scene. Edit freely — the assembler reads this file. 'prompt' is the ComfyUI image prompt; deliberately objects/places, never people, since the model is weak at hands.",
   "items": [
     {
       "id": "fabric",
       "word": "FABRIC",
       "looks_like": "фабрика",
       "actually": "плат",
-      "vo": "Fabric не е фабрика. Означава плат. Фабриката е factory."
+      "vo": "Fabric не е фабрика. Означава плат. Фабриката е factory.",
+      "prompt": "folded bolts of luxurious textile fabric on a tailor's wooden table, soft window light, macro detail"
     },
     {
       "id": "magazine",
       "word": "MAGAZINE",
       "looks_like": "магазин",
       "actually": "списание",
-      "vo": "Magazine не е магазин. Означава списание. Магазинът е shop."
+      "vo": "Magazine не е магазин. Означава списание. Магазинът е shop.",
+      "prompt": "a stack of glossy magazines fanned on a marble coffee table, morning light, editorial photography"
     },
     {
       "id": "prospect",
       "word": "PROSPECT",
       "looks_like": "проспект",
       "actually": "перспектива",
-      "vo": "Prospect не е проспект. Означава перспектива или възможност."
+      "vo": "Prospect не е проспект. Означава перспектива или възможност.",
+      "prompt": "a wide mountain vista at sunrise seen from a high ridge, layered blue hills, cinematic landscape"
     },
     {
       "id": "accord",
       "word": "ACCORD",
       "looks_like": "акорд",
       "actually": "споразумение",
-      "vo": "Accord не е музикален акорд. Означава споразумение."
+      "vo": "Accord не е музикален акорд. Означава споразумение.",
+      "prompt": "an antique fountain pen resting on a signed formal document, warm desk lamp light, shallow depth of field"
     },
     {
       "id": "actual",
       "word": "ACTUAL",
       "looks_like": "актуален",
       "actually": "действителен",
-      "vo": "Actual не значи актуален. Означава действителен, истински."
+      "vo": "Actual не значи актуален. Означава действителен, истински.",
+      "prompt": "a vintage analog clock face in sharp focus on a plain wall, dramatic side light"
     },
     {
       "id": "biscuit",
       "word": "BISCUIT",
       "looks_like": "бисквита",
       "actually": "бисквита или питка",
-      "vo": "В Америка biscuit не е бисквита, а солена питка."
+      "vo": "В Америка biscuit не е бисквита, а солена питка.",
+      "prompt": "warm golden buttermilk biscuits in a rustic cast iron skillet, steam rising, food photography"
     },
     {
       "id": "brilliant",
       "word": "BRILLIANT",
       "looks_like": "брилянт",
       "actually": "блестящ",
-      "vo": "Brilliant не е брилянт. Означава блестящ или страхотен."
+      "vo": "Brilliant не е брилянт. Означава блестящ или страхотен.",
+      "prompt": "a cut diamond refracting light on black velvet, dramatic studio lighting, macro"
     },
     {
       "id": "cabinet",
       "word": "CABINET",
       "looks_like": "кабинет",
       "actually": "шкаф",
-      "vo": "Cabinet не е кабинет. Най-често означава шкаф."
+      "vo": "Cabinet не е кабинет. Най-често означава шкаф.",
+      "prompt": "an elegant wooden kitchen cabinet with glass doors and neat china, soft daylight"
     },
     {
       "id": "concourse",
       "word": "CONCOURSE",
       "looks_like": "конкурс",
       "actually": "голяма зала",
-      "vo": "Concourse не е конкурс. Означава голяма зала на летище или гара."
+      "vo": "Concourse не е конкурс. Означава голяма зала на летище или гара.",
+      "prompt": "a vast empty airport terminal concourse, soaring glass ceiling, polished floors, wide angle"
     },
     {
       "id": "criminal",
       "word": "CRIMINAL",
       "looks_like": "криминален",
       "actually": "престъпник",
-      "vo": "Criminal най-често означава престъпник, а не криминален жанр."
+      "vo": "Criminal най-често означава престъпник, а не криминален жанр.",
+      "prompt": "an empty dim police interrogation room, single hanging lamp, moody noir lighting"
     },
     {
       "id": "decoration",
       "word": "DECORATION",
       "looks_like": "декорация",
       "actually": "украса или орден",
-      "vo": "Decoration може да значи орден за храброст, не само украса."
+      "vo": "Decoration може да значи орден за храброст, не само украса.",
+      "prompt": "a military medal on a silk ribbon displayed in a velvet case, dramatic light, macro"
     },
     {
       "id": "familiar",
       "word": "FAMILIAR",
       "looks_like": "фамилиарен",
       "actually": "познат",
-      "vo": "Familiar не е фамилиарен. Означава познат, добре известен."
+      "vo": "Familiar не е фамилиарен. Означава познат, добре известен.",
+      "prompt": "a cosy familiar living room with a worn armchair and bookshelf, golden hour light"
     },
     {
       "id": "genial",
       "word": "GENIAL",
       "looks_like": "гениален",
       "actually": "любезен",
-      "vo": "Genial не е гениален. Означава любезен и приветлив."
+      "vo": "Genial не е гениален. Означава любезен и приветлив.",
+      "prompt": "a sunlit welcoming cafe terrace with empty chairs and flowers, warm inviting atmosphere"
     },
     {
       "id": "intelligent",
       "word": "INTELLIGENT",
       "looks_like": "интелигентен",
       "actually": "умен",
-      "vo": "Intelligent значи умен. Интелигентен в нашия смисъл е cultured."
+      "vo": "Intelligent значи умен. Интелигентен в нашия смисъл е cultured.",
+      "prompt": "a chessboard mid-game on a wooden table, dramatic side lighting, shallow focus"
     },
     {
       "id": "list",
       "word": "LIST",
       "looks_like": "лист",
       "actually": "списък",
-      "vo": "List не е лист хартия. Означава списък. Листът е sheet."
+      "vo": "List не е лист хартия. Означава списък. Листът е sheet.",
+      "prompt": "a handwritten checklist on paper beside a cup of coffee, overhead flat lay, soft light"
     },
     {
       "id": "marmalade",
       "word": "MARMALADE",
       "looks_like": "мармалад",
       "actually": "конфитюр от цитруси",
-      "vo": "Marmalade е конфитюр само от цитруси, не всякакъв мармалад."
+      "vo": "Marmalade е конфитюр само от цитруси, не всякакъв мармалад.",
+      "prompt": "a glass jar of orange marmalade beside fresh citrus fruit on a wooden board, bright morning light"
     },
     {
       "id": "novel",
       "word": "NOVEL",
       "looks_like": "новела",
       "actually": "роман",
-      "vo": "Novel не е новела. Означава роман."
+      "vo": "Novel не е новела. Означава роман.",
+      "prompt": "an open hardcover novel on a windowsill beside a steaming teacup, warm afternoon light"
     },
     {
       "id": "occupation",
       "word": "OCCUPATION",
       "looks_like": "окупация",
       "actually": "професия",
-      "vo": "Occupation обикновено значи професия, а не окупация."
+      "vo": "Occupation обикновено значи професия, а не окупация.",
+      "prompt": "a tidy carpenter's workbench with neat tools arranged, warm workshop light, no people"
     },
     {
       "id": "paragraph",
       "word": "PARAGRAPH",
       "looks_like": "параграф",
       "actually": "абзац",
-      "vo": "Paragraph не е параграф в закон. Означава абзац."
+      "vo": "Paragraph не е параграф в закон. Означава абзац.",
+      "prompt": "a close-up of printed book text with visible paragraph indentation, shallow depth of field"
     },
     {
       "id": "receipt",
       "word": "RECEIPT",
       "looks_like": "рецепта",
       "actually": "касова бележка",
-      "vo": "Receipt не е рецепта. Означава касова бележка. Рецептата е recipe."
+      "vo": "Receipt не е рецепта. Означава касова бележка. Рецептата е recipe.",
+      "prompt": "a paper shop receipt curled on a cafe counter beside a coffee cup, soft daylight"
     },
     {
       "id": "replica",
       "word": "REPLICA",
       "looks_like": "реплика",
       "actually": "копие",
-      "vo": "Replica не е реплика в разговор. Означава точно копие."
+      "vo": "Replica не е реплика в разговор. Означава точно копие.",
+      "prompt": "a museum display case with a classical marble bust replica, dramatic gallery lighting"
     },
     {
       "id": "scholar",
       "word": "SCHOLAR",
       "looks_like": "ученик",
       "actually": "учен",
-      "vo": "Scholar не е ученик. Означава учен или изследовател."
+      "vo": "Scholar не е ученик. Означава учен или изследовател.",
+      "prompt": "an old university study desk piled with leather books and a brass lamp, warm library light"
     },
     {
       "id": "sympathy",
       "word": "SYMPATHY",
       "looks_like": "симпатия",
       "actually": "съчувствие",
-      "vo": "Sympathy не е симпатия. Означава съчувствие."
+      "vo": "Sympathy не е симпатия. Означава съчувствие.",
+      "prompt": "a single white lily on a dark wooden table, soft diffused light, quiet melancholy mood"
     },
     {
       "id": "transpire",
       "word": "TRANSPIRE",
       "looks_like": "транспортирам",
       "actually": "оказва се",
-      "vo": "Transpire означава оказва се, че. Няма нищо общо с транспорт."
+      "vo": "Transpire означава оказва се, че. Няма нищо общо с транспорт.",
+      "prompt": "morning mist rising over a still forest lake at dawn, atmospheric landscape photography"
     },
     {
       "id": "velvet",
       "word": "VELVET",
       "looks_like": "велур",
       "actually": "кадифе",
-      "vo": "Velvet не е велур. Означава кадифе."
+      "vo": "Velvet не е велур. Означава кадифе.",
+      "prompt": "deep red velvet theatre curtains in rich folds, dramatic stage lighting, texture detail"
     },
     {
       "id": "artist",
       "word": "ARTIST",
       "looks_like": "артист",
       "actually": "художник",
-      "vo": "Artist най-често значи художник, а не театрален артист."
+      "vo": "Artist най-често значи художник, а не театрален артист.",
+      "prompt": "an artist's easel with palette and oil paints in a sunlit studio, no people, warm light"
     },
     {
       "id": "academic",
       "word": "ACADEMIC",
       "looks_like": "академик",
       "actually": "университетски",
-      "vo": "Academic значи университетски или научен, не академик."
+      "vo": "Academic значи университетски или научен, не академик.",
+      "prompt": "a grand university lecture hall with empty wooden tiered seats, tall windows, wide angle"
     },
     {
       "id": "data",
       "word": "DATA",
       "looks_like": "дата",
       "actually": "данни",
-      "vo": "Data не е дата. Означава данни. Датата е date."
+      "vo": "Data не е дата. Означава данни. Датата е date.",
+      "prompt": "glowing data visualisation charts on a dark computer monitor, moody office light, bokeh"
     },
     {
       "id": "dramatic",
       "word": "DRAMATIC",
       "looks_like": "драматичен",
       "actually": "рязък",
-      "vo": "Dramatic често значи рязък или значителен, не само драматичен."
+      "vo": "Dramatic често значи рязък или значителен, не само драматичен.",
+      "prompt": "storm clouds gathering over a dramatic coastal cliff, moody sky, cinematic landscape"
     },
     {
       "id": "figure",
       "word": "FIGURE",
       "looks_like": "фигура",
       "actually": "число",
-      "vo": "Figure много често означава число или цифра."
+      "vo": "Figure много често означава число или цифра.",
+      "prompt": "vintage printed numbers and figures in an old ledger book, macro, warm desk light"
     },
     {
       "id": "gymnasium",
       "word": "GYMNASIUM",
       "looks_like": "гимназия",
       "actually": "физкултурен салон",
-      "vo": "Gymnasium не е гимназия. Означава физкултурен салон."
+      "vo": "Gymnasium не е гимназия. Означава физкултурен салон.",
+      "prompt": "an empty school gymnasium with polished wooden floor and basketball hoops, natural light"
     },
     {
       "id": "lecture",
       "word": "LECTURE",
       "looks_like": "лекция",
       "actually": "лекция или конско",
-      "vo": "Lecture може да значи и конско, не само лекция."
+      "vo": "Lecture може да значи и конско, не само лекция.",
+      "prompt": "an empty lecture theatre with a blackboard and rows of seats, soft daylight through windows"
     },
     {
       "id": "physician",
       "word": "PHYSICIAN",
       "looks_like": "физик",
       "actually": "лекар",
-      "vo": "Physician не е физик. Означава лекар. Физикът е physicist."
+      "vo": "Physician не е физик. Означава лекар. Физикът е physicist.",
+      "prompt": "a stethoscope resting on a clean clinic desk beside a notebook, soft clinical light"
     },
     {
       "id": "preservative",
       "word": "PRESERVATIVE",
       "looks_like": "презерватив",
       "actually": "консервант",
-      "vo": "Preservative значи консервант в храната. Внимавай с тази дума."
+      "vo": "Preservative значи консервант в храната. Внимавай с тази дума.",
+      "prompt": "rows of preserved vegetables in glass jars on a pantry shelf, warm rustic light"
     },
     {
       "id": "principal",
       "word": "PRINCIPAL",
       "looks_like": "принципен",
       "actually": "главен",
-      "vo": "Principal значи главен или директор, не принципен."
+      "vo": "Principal значи главен или директор, не принципен.",
+      "prompt": "an imposing school building facade with a grand entrance, golden hour light, architecture"
     },
     {
       "id": "protection",
       "word": "PROTECTION",
       "looks_like": "протекция",
       "actually": "защита",
-      "vo": "Protection означава защита, а не протекция по познанство."
+      "vo": "Protection означава защита, а не протекция по познанство.",
+      "prompt": "a sturdy medieval castle wall and gate, dramatic sky, architectural photography"
     },
     {
       "id": "pretend",
       "word": "PRETEND",
       "looks_like": "претендирам",
       "actually": "преструвам се",
-      "vo": "Pretend не е претендирам. Означава преструвам се."
+      "vo": "Pretend не е претендирам. Означава преструвам се.",
+      "prompt": "an ornate venetian carnival mask on dark velvet, dramatic moody lighting"
     },
     {
       "id": "resume",
       "word": "RESUME",
       "looks_like": "резюме",
       "actually": "възобновявам",
-      "vo": "Resume като глагол значи възобновявам."
+      "vo": "Resume като глагол значи възобновявам.",
+      "prompt": "a vintage typewriter on a wooden desk with a sheet of paper, warm nostalgic light"
     },
     {
       "id": "student",
       "word": "STUDENT",
       "looks_like": "студент",
       "actually": "ученик или студент",
-      "vo": "Student е всеки учащ, включително ученик в училище."
+      "vo": "Student е всеки учащ, включително ученик в училище.",
+      "prompt": "an empty classroom with wooden desks and morning sun streaming through windows"
     },
     {
       "id": "trap",
       "word": "TRAP",
       "looks_like": "трап",
       "actually": "капан",
-      "vo": "Trap не е трап на пътя. Означава капан."
+      "vo": "Trap не е трап на пътя. Означава капан.",
+      "prompt": "an old rusted iron animal trap on forest floor leaves, moody natural light, macro"
     }
   ]
 }

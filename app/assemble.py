@@ -70,8 +70,13 @@ def build(
                 duration=estimate_duration(intro_line),
                 transition="cut",
                 image=ImageAsset(
+                    prompt=(
+                        "an open english dictionary page in warm lamplight, "
+                        "shallow depth of field, cinematic still life"
+                    ),
                     placeholder_color=PALETTE[0],
                     motion=Motion(type="zoom_in", amount=1.10),
+                    status="stale",
                 ),
                 voice=VoiceAsset(text=intro_line),
                 card=Card(word="FALSE FRIENDS", looks_like="", actually=""),
@@ -86,8 +91,12 @@ def build(
                 duration=estimate_duration(item["vo"]),
                 transition="crossfade" if (i or intro) else "cut",
                 image=ImageAsset(
+                    prompt=item.get("prompt", ""),
                     placeholder_color=PALETTE[(i + idx) % len(PALETTE)],
                     motion=Motion(type=MOTIONS[(i + idx) % len(MOTIONS)], amount=1.13),
+                    # No file yet: the studio generates it, and the flat colour
+                    # stands in until then so the video always renders.
+                    status="stale" if item.get("prompt") else "empty",
                 ),
                 voice=VoiceAsset(text=item["vo"]),
                 card=Card(

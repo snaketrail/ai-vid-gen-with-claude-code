@@ -154,6 +154,43 @@
         seek(t);
       });
 
+      if (scene.image.asset) {
+        const thumb = document.createElement('img');
+        thumb.className = 'thumb';
+        thumb.src = `/media/${PROJECT}/${scene.image.asset}?t=${scene.image.hash || ''}`;
+        card.appendChild(thumb);
+      }
+
+      const imgRow = document.createElement('div');
+      imgRow.className = 'row';
+      const reroll = document.createElement('button');
+      reroll.className = 'btn small';
+      reroll.textContent = scene.image.asset ? '🎲 Re-roll image' : '🖼 Generate image';
+      reroll.addEventListener('click', () => {
+        runJob(
+          `/api/projects/${PROJECT}/images?scene_id=${scene.id}`,
+          reroll, {}, `images_${PROJECT}`,
+        );
+      });
+      imgRow.appendChild(reroll);
+
+      const lock = document.createElement('button');
+      lock.className = 'btn small';
+      lock.textContent = scene.image.locked ? '🔒 Locked' : '🔓 Lock';
+      lock.title = 'Locked images are never regenerated';
+      lock.addEventListener('click', () => {
+        scene.image.locked = !scene.image.locked;
+        save();
+      });
+      imgRow.appendChild(lock);
+      card.appendChild(imgRow);
+
+      const ip = document.createElement('textarea');
+      ip.value = scene.image.prompt || '';
+      ip.placeholder = 'Image prompt (avoid people/hands)';
+      ip.addEventListener('input', () => { scene.image.prompt = ip.value; save(); });
+      card.appendChild(labelled('Image prompt', ip));
+
       const cw = document.createElement('input');
       cw.type = 'text';
       cw.value = scene.card.word;
@@ -297,7 +334,7 @@
 
   // ---- export ---------------------------------------------------------
 
-  async function runJob(url, btn, body) {
+  async function runJob(url, btn, body, jobId) {
     const status = $('exportStatus');
     const others = [$('makeBtn'), $('exportBtn')];
     others.forEach((b) => (b.disabled = true));
@@ -316,6 +353,7 @@
       return;
     }
     const { job } = await res.json();
+    void jobId;
 
     const poll = setInterval(async () => {
       const j = await (await fetch(`/api/jobs/${job}`)).json();
