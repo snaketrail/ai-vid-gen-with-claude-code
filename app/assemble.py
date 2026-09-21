@@ -13,7 +13,35 @@ from pathlib import Path
 from .models import Card, ImageAsset, Motion, Project, Scene, VoiceAsset
 from . import store
 
-DECK_PATH = store.ROOT / "content" / "false_friends.json"
+DECKS = {
+    "false_friends": store.ROOT / "content" / "false_friends.json",
+    "word_explanations": store.ROOT / "content" / "word_explanations.json",
+    "synonyms": store.ROOT / "content" / "synonyms.json",
+}
+DECK_PATH = DECKS["false_friends"]  # kept for backward compatibility
+
+# The intro scene's card. It named the series, so a synonyms or vocab video
+# must not inherit the false-friends title.
+INTRO_CARDS = {
+    "false_friends": "FALSE FRIENDS",
+    "word_explanations": "ENGLISH WORDS",
+    "synonyms": "SYNONYMS",
+}
+
+INTRO_LINES = {
+    "false_friends": {
+        1: "Една английска дума, която българите бъркат.",
+        "n": "{n} английски думи, които българите бъркат.",
+    },
+    "word_explanations": {
+        1: "Една английска дума, която трябва да знаеш.",
+        "n": "{n} английски думи, които трябва да знаеш.",
+    },
+    "synonyms": {
+        1: "Един синоним, който ще обогати речника ти.",
+        "n": "{n} синонима, които ще обогатят речника ти.",
+    },
+}
 
 # Backgrounds cycle through a fixed palette so consecutive scenes never share
 # a colour. Deep, desaturated tones keep the white card text readable.
@@ -34,15 +62,28 @@ MIN_SCENE = 2.6
 NUMERALS = {1: "Една", 2: "Две", 3: "Три", 4: "Четири", 5: "Пет", 6: "Шест"}
 
 
-def intro_text(count: int) -> str:
+def intro_text(count: int, deck: str = "false_friends") -> str:
+    lines = INTRO_LINES.get(deck, INTRO_LINES["false_friends"])
     if count == 1:
-        return "Една английска дума, която българите бъркат."
+        return lines[1]
     n = NUMERALS.get(count, str(count))
-    return f"{n} английски думи, които българите бъркат."
+    return lines["n"].format(n=n)
 
 
-def load_deck() -> list[dict]:
-    data = json.loads(DECK_PATH.read_text(encoding="utf-8"))
+def deck_path(deck: str = "false_friends") -> Path:
+    """Resolve a deck name to a file, preferring a private local deck.
+
+    The repo ships small demo decks so a fresh clone works out of the box.
+    A personal deck lives beside it as `<name>.local.json` (gitignored) and
+    wins when present, so real content never has to be committed.
+    """
+    path = DECKS.get(deck, DECK_PATH)
+    local = path.with_suffix(".local.json")
+    return local if local.exists() else path
+
+
+def load_deck(deck: str = "false_friends") -> list[dict]:
+    data = json.loads(deck_path(deck).read_text(encoding="utf-8"))
     return data["items"]
 
 
@@ -65,10 +106,11 @@ def build(
     seed: int | None = None,
     intro: bool = True,
     used: set[str] | None = None,
+    deck: str = "false_friends",
 ) -> Project:
     """Create (or overwrite) a project with freshly assembled scenes."""
-    deck = load_deck()
-    items = pick_items(deck, count, used or set(), seed)
+    items_pool = load_deck(deck)
+    items = pick_items(items_pool, count, used or set(), seed)
 
     try:
         project = store.load(project_id)
@@ -80,7 +122,7 @@ def build(
 
     idx = 0
     if intro:
-        intro_line = intro_text(len(items))
+        intro_line = intro_text(len(items), deck)
         project.scenes.append(
             Scene(
                 id="sc_intro",
@@ -96,7 +138,7 @@ def build(
                     status="stale",
                 ),
                 voice=VoiceAsset(text=intro_line),
-                card=Card(word="FALSE FRIENDS", looks_like="", actually=""),
+                card=Card(word=INTRO_CARDS.get(deck, "FALSE FRIENDS"), looks_like="", actually=""),
             )
         )
         idx = 1
@@ -129,3 +171,19 @@ def build(
 
 def deck_ids_in(project: Project) -> set[str]:
     return {s.id.replace("sc_", "", 1) for s in project.scenes}
+
+
+def deck_ids_everywhere() -> set[str]:
+    """Deck items used by *any* project on disk.
+
+    `deck_ids_in` only sees one project, so a fresh project would happily
+    repeat words an earlier video already taught. Reading every project.json
+    keeps a new video's words genuinely new.
+    """
+    used: set[str] = set()
+    for pid in store.list_projects():
+        try:
+            used |= deck_ids_in(store.load(pid))
+        except Exception:
+            continue  # a half-written project must not block assembling
+    return used

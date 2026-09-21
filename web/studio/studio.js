@@ -383,7 +383,8 @@
 
   $('makeBtn').addEventListener('click', () => {
     const count = Math.max(1, Math.min(6, Number($('wordCount').value) || 5));
-    runJob(`/api/projects/${PROJECT}/make`, $('makeBtn'), { count, intro: true });
+    const deck = $('deckPick').value;
+    runJob(`/api/projects/${PROJECT}/make`, $('makeBtn'), { count, intro: true, deck });
   });
 
   $('addScene').addEventListener('click', async () => {

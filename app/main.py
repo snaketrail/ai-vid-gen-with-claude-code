@@ -115,18 +115,22 @@ class AssembleReq(BaseModel):
     count: int = 3
     seed: int | None = None
     intro: bool = True
+    deck: str = "false_friends"
 
 
 @app.post("/api/projects/{project_id}/assemble")
 def api_assemble(project_id: str, body: AssembleReq) -> dict:
-    """One click: build a full false-friends video from the deck."""
-    used: set[str] = set()
+    """One click: build a full deck-based video (false friends, word
+    explanations, or synonyms — same scene shape, different content file)."""
+    # Avoid words any earlier video already taught, not just this project's.
+    used: set[str] = assemble_mod.deck_ids_everywhere()
     try:
-        used = assemble_mod.deck_ids_in(store.load(project_id))
+        used |= assemble_mod.deck_ids_in(store.load(project_id))
     except FileNotFoundError:
         pass
     p = assemble_mod.build(
-        project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
+        project_id, count=body.count, seed=body.seed, intro=body.intro,
+        used=used, deck=body.deck,
     )
     return p.model_dump()
 
@@ -230,8 +234,8 @@ def api_outro() -> dict:
 
 
 @app.get("/api/deck")
-def api_deck() -> list[dict]:
-    return assemble_mod.load_deck()
+def api_deck(deck: str = "false_friends") -> list[dict]:
+    return assemble_mod.load_deck(deck)
 
 
 # ---------------------------------------------------------------- export
@@ -299,13 +303,15 @@ def api_make(project_id: str, body: AssembleReq) -> dict:
     Only scenes whose voice-over already has audio get sound; lines without a
     matching file are silent but still timed, so the video always completes.
     """
-    used: set[str] = set()
+    # Avoid words any earlier video already taught, not just this project's.
+    used: set[str] = assemble_mod.deck_ids_everywhere()
     try:
-        used = assemble_mod.deck_ids_in(store.load(project_id))
+        used |= assemble_mod.deck_ids_in(store.load(project_id))
     except FileNotFoundError:
         pass
     assemble_mod.build(
-        project_id, count=body.count, seed=body.seed, intro=body.intro, used=used
+        project_id, count=body.count, seed=body.seed, intro=body.intro,
+        used=used, deck=body.deck,
     )
     # Generate images first if ComfyUI is available, then render. Without it
     # the flat placeholder colours are used, so a video still comes out.

@@ -5,7 +5,12 @@ Local studio for 20–30 second vertical videos (TikTok / YouTube Shorts,
 timeline. Export drives that same page frame by frame in headless Chromium and
 pipes the frames to ffmpeg.
 
-See [CLAUDE.md](CLAUDE.md) for the full build specification.
+Built for the English-for-Bulgarians shorts on
+**[@stefdim.online](https://www.tiktok.com/@stefdim.online)** — that channel is
+what this tool makes.
+
+See [CLAUDE.md](CLAUDE.md) for the full build specification, and
+[MAKING_A_VIDEO.md](MAKING_A_VIDEO.md) for the runbook that drives it.
 
 ## Quick start
 
@@ -22,16 +27,30 @@ Playwright (a few minutes). Later runs start immediately.
 
 ## Status
 
-**Phase 1 complete** — the full pipeline works end to end with placeholder
-colour backgrounds:
+Working end to end. One click assembles a deck into scenes, generates the
+images and voice-over, renders, and appends the cached outro:
 
 - scene timeline, per-scene motion / text animation / transitions
 - live preview with a scrubber, sharing one renderer with the export
 - burned-in karaoke captions with correct Cyrillic
+- ComfyUI images per scene, re-rollable one at a time
+- ElevenLabs Bulgarian voice-over with word-level caption timing
 - export to H.264 MP4, 1080×1920, yuv420p
 
-Next: Phase 2 (ElevenLabs Bulgarian voice-over + real word timings), then
-Phase 3 (ComfyUI images), then Phase 4 (the full studio).
+## Content decks
+
+A video is assembled from a **deck** — a JSON file of entries, one per scene.
+Three ship as small demo decks so a fresh clone runs immediately:
+
+| Deck | File | A scene teaches |
+|---|---|---|
+| `false_friends` | `content/false_friends.json` | An English word a Bulgarian misreads (`FABRIC` ≠ фабрика, = плат) |
+| `word_explanations` | `content/word_explanations.json` | A useful English word, plainly defined |
+| `synonyms` | `content/synonyms.json` | An upgrade for a basic word (`HAPPY` → delighted, thrilled) |
+
+Edit those files freely. To keep a personal deck out of git, save it beside the
+demo as `content/<name>.local.json` — that file is gitignored and takes
+precedence when present.
 
 ## Layout
 

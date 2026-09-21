@@ -186,6 +186,33 @@ def ensure(
     return CLIP
 
 
+def _has_audio_stream(path: Path) -> bool:
+    proc = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "a",
+            "-show_entries", "stream=index",
+            "-of", "csv=p=0",
+            str(path),
+        ],
+        capture_output=True, text=True,
+    )
+    return bool(proc.stdout.strip())
+
+
+def _duration(path: Path) -> float:
+    proc = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "csv=p=0",
+            str(path),
+        ],
+        capture_output=True, text=True,
+    )
+    return float(proc.stdout.strip() or 0.0)
+
+
 def append_to(main: Path, out_path: Path) -> Path:
     """Concatenate the cached outro onto a rendered video.
 
@@ -197,21 +224,42 @@ def append_to(main: Path, out_path: Path) -> Path:
     if not CLIP.exists():
         return main
 
-    filt = (
-        "[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[v][a]"
-    )
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", str(main),
-        "-i", str(CLIP),
-        "-filter_complex", filt,
-        "-map", "[v]", "-map", "[a]",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "192k",
-        "-movflags", "+faststart",
-        str(out_path),
-    ]
+    # The body has no audio track when no scene has a voice-over yet (e.g. the
+    # ElevenLabs key isn't set). concat demands matching streams on both
+    # inputs, so feed a silent track for the body rather than failing outright
+    # — a video should always come out, per CLAUDE.md.
+    if _has_audio_stream(main):
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(main),
+            "-i", str(CLIP),
+            "-filter_complex", "[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[v][a]",
+            "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart",
+            str(out_path),
+        ]
+    else:
+        # anullsrc is an infinite source: without an explicit -t, concat never
+        # sees its audio segment end and ffmpeg keeps encoding past the video.
+        main_duration = _duration(main)
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(main),
+            "-f", "lavfi", "-t", f"{main_duration:.3f}",
+            "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+            "-i", str(CLIP),
+            "-filter_complex",
+            "[0:v][1:a][2:v][2:a]concat=n=2:v=1:a=1[v][a]",
+            "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart",
+            str(out_path),
+        ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
         raise RuntimeError("ffmpeg failed appending outro:\n" + proc.stderr[-1500:])

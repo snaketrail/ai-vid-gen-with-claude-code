@@ -1,0 +1,37 @@
+{
+  "_comment": "English synonym pairs, one base word per scene. 'word' is the common/basic English word; 'looks_like' holds a short 'instead of' label so the card shows the base word crossed out; 'actually' lists upgrade synonyms, shown with the check tag; 'vo' is the Bulgarian voice-over line teaching the swap. 'prompt' is the ComfyUI image prompt; deliberately objects/places, never people, since the model is weak at hands. DEMO DECK — a handful of example entries so a fresh clone runs. Replace this file with your own, or drop a private deck beside it as '<name>.local.json' (gitignored), which takes precedence.",
+  "items": [
+    {
+      "id": "demo_big",
+      "word": "BIG",
+      "looks_like": "вместо big кажи",
+      "actually": "immense, vast, colossal",
+      "vo": "Вместо big опитай immense, vast или colossal — звучи далеч по-силно.",
+      "prompt": "a towering ancient redwood trunk seen from its base looking up, misty forest, sense of scale"
+    },
+    {
+      "id": "demo_good",
+      "word": "GOOD",
+      "looks_like": "вместо good кажи",
+      "actually": "excellent, superb, outstanding",
+      "vo": "Вместо good кажи excellent, superb или outstanding — по-точно и по-убедително.",
+      "prompt": "a perfectly plated gourmet dish under warm restaurant lighting, fine dining presentation"
+    },
+    {
+      "id": "demo_sad",
+      "word": "SAD",
+      "looks_like": "вместо sad кажи",
+      "actually": "melancholy, despondent, downcast",
+      "vo": "Вместо sad опитай melancholy, despondent или downcast — нюансите са различни.",
+      "prompt": "rain streaking down a window pane overlooking a grey empty street, muted tones, quiet mood"
+    },
+    {
+      "id": "demo_fast",
+      "word": "FAST",
+      "looks_like": "вместо fast кажи",
+      "actually": "rapid, swift, brisk",
+      "vo": "Вместо fast кажи rapid, swift или brisk — звучи по-образовано.",
+      "prompt": "a mountain stream rushing over smooth stones, long exposure motion blur, crisp daylight"
+    }
+  ]
+}

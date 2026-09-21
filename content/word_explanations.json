@@ -1,0 +1,45 @@
+{
+  "_comment": "Standalone English vocabulary explainers (no false-friend trap). 'word' is the English word/phrase; 'looks_like' is left empty so the player skips the trap row; 'actually' is the plain-English definition, shown with the check tag; 'vo' is the Bulgarian voice-over line explaining the word. 'prompt' is the ComfyUI image prompt; deliberately objects/places, never people, since the model is weak at hands. DEMO DECK — a handful of example entries so a fresh clone runs. Replace this file with your own, or drop a private deck beside it as '<name>.local.json' (gitignored), which takes precedence.",
+  "items": [
+    {
+      "id": "demo_meticulous",
+      "word": "METICULOUS",
+      "looks_like": "",
+      "actually": "extremely careful about detail",
+      "vo": "Meticulous описва човек, който внимава за всеки детайл. Часовникар е meticulous.",
+      "prompt": "a watchmaker's bench with tiny gears laid out in perfect rows, tweezers, warm focused lamp light"
+    },
+    {
+      "id": "demo_resilient",
+      "word": "RESILIENT",
+      "looks_like": "",
+      "actually": "able to recover quickly",
+      "vo": "Resilient значи устойчив — нещо, което се възстановява бързо след удар.",
+      "prompt": "a small green sapling growing through a crack in dry cracked earth, dramatic backlight"
+    },
+    {
+      "id": "demo_ambiguous",
+      "word": "AMBIGUOUS",
+      "looks_like": "",
+      "actually": "open to more than one meaning",
+      "vo": "Ambiguous означава двусмислен — нещо, което може да се разбере по няколко начина.",
+      "prompt": "a weathered wooden signpost with arrows pointing opposite directions, foggy crossroads, muted light"
+    },
+    {
+      "id": "demo_scarce",
+      "word": "SCARCE",
+      "looks_like": "",
+      "actually": "available in very small amounts",
+      "vo": "Scarce значи оскъден — има го съвсем малко. Водата е scarce в пустинята.",
+      "prompt": "a single drop of water falling from a rusted tap into an empty metal basin, harsh dry light"
+    },
+    {
+      "id": "demo_candid",
+      "word": "CANDID",
+      "looks_like": "",
+      "actually": "honest and direct, even when awkward",
+      "vo": "Candid значи откровен — казваш истината направо, дори да е неудобно.",
+      "prompt": "an open empty notebook with a pen beside a window, plain honest morning light, minimal composition"
+    }
+  ]
+}
