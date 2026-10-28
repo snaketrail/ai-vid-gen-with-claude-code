@@ -157,8 +157,24 @@ holds, and holds are almost free thanks to frame reuse. At 1.5× real time a
 < 1 h target is roughly met already; per-chapter parallel workers would cut
 it further, and per-chapter caching would make edits re-render one chapter.
 
+**Full-length test: `content/lessons/reported_speech_b1.json`**
+- B1 reported speech: 11 chapters, 90 slides (28 quizzes), **29:54**.
+- One Chromium worker in the cloud container: **2792 s (46.5 min) for
+  1794 s of video, 1.56× real time**. 37415 of 53805 frames reused (70%).
+- Chromium memory flat at ~0.9 GB for the whole run; no growth, no crash.
+- Full decode of the MP4 with ffmpeg: no errors. Spot checks across the
+  whole length land on the expected slide at the expected time (no drift).
+- Found and fixed along the way: recap overflow with 6 cards, punctuation
+  wrapping after a highlight, strike-through on wrapped text, the quiz
+  countdown overlapping long questions, long vocab words.
+
+**Is the long-form format done?** For silent, animated lessons: yes, it
+works end to end at full length. What is left is convenience and speed, not
+capability:
+
 **Next**
-1. Phase E: chapter-parallel rendering + per-chapter cache, then measure.
+1. Phase E: chapter-parallel rendering + per-chapter cache. Today a typo fix
+   costs a full 45-minute re-render.
 2. Phase G: lessons in the studio (it is still hard-wired to the Shorts
    project `ff` and a 9:16 preview).
 3. A lighter font weight: the bundled font is Segoe UI Black only. Bundling

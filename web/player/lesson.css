@@ -453,7 +453,9 @@
   background: var(--accent);
   transform-origin: left center;
 }
-.t-quiz .count { position: absolute; right: 0; top: 0; width: 150px; height: 150px; }
+/* Sits up in the badge row, clear of the question, which can span the full
+   width on long sentences. */
+.t-quiz .count { position: absolute; right: 0; top: -30px; width: 110px; height: 110px; }
 .t-quiz .count .n {
   position: absolute;
   inset: 0;
@@ -462,7 +464,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 80px;
+  font-size: 60px;
   color: var(--accent);
 }
 .t-quiz .explain { font-size: 46px; color: var(--muted); margin-top: 44px; text-align: center; }
