@@ -32,7 +32,8 @@ def _open_page(pw, project):
         executable_path=os.environ.get("PLAYWRIGHT_CHROMIUM_PATH") or None,
         # Same flags as the exporter, so this tests what actually renders.
         args=["--disable-lcd-text", "--force-device-scale-factor=1",
-              "--hide-scrollbars", "--disable-gpu", "--disable-dev-shm-usage"],
+              "--hide-scrollbars", "--disable-gpu", "--disable-partial-raster",
+              "--disable-dev-shm-usage"],
     )
     page = browser.new_page(
         viewport={"width": project.settings.width, "height": project.settings.height},

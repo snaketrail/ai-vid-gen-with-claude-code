@@ -97,6 +97,11 @@ def render(
                 "--force-device-scale-factor=1",
                 "--hide-scrollbars",
                 "--disable-gpu",                # headless GPU raster is nondeterministic
+                # Re-raster whole tiles, never just the changed part. With partial
+                # raster a frame's pixels depend on which frames came before it
+                # (a one-pixel difference on an edge that just animated), and the
+                # same t must always give the same PNG.
+                "--disable-partial-raster",
                 # A long render is hundreds of full-page screenshots. Chromium's
                 # default shared-memory budget is far too small for that at
                 # 1080x1920 and the browser is killed part-way through, which

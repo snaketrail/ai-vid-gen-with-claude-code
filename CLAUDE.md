@@ -592,8 +592,10 @@ into a project by `app/lesson.py`; the lesson file is the source of truth.
 - Text fields accept `**word**` for a highlight.
 - The bundled font has no ✓/✗ glyphs. Never use a character the font lacks:
   the fallback font differs between machines and the export would change.
-- A transform at rest is removed, not set to identity: Chromium otherwise
-  rasterises text that has just moved on slightly different pixels.
+- A transform at rest is removed, not set to identity, and Chromium runs
+  with `--disable-partial-raster`. Without both, an element that has just
+  animated rasterises on slightly different pixels than one that never
+  moved, so a frame would depend on the frames rendered before it.
 
 **Determinism is tested, not assumed.** `python -m app.check_determinism
 <project> [--verify-dedupe]` renders sample frames in two browsers (one in
