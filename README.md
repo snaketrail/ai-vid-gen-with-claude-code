@@ -37,6 +37,18 @@ images and voice-over, renders, and appends the cached outro:
 - ElevenLabs Bulgarian voice-over with word-level caption timing
 - export to H.264 MP4, 1080×1920, yuv420p
 
+## Long-form lessons (16:9)
+
+Beside the Shorts, the app makes animated 1920×1080 YouTube lessons from
+`content/lessons/<name>.json`. See [docs/LESSON_PLAN.md](docs/LESSON_PLAN.md).
+
+```
+python -m app.lesson modal_verbs_a1 --render
+```
+
+Preview while the app runs:
+http://127.0.0.1:8000/player/preview.html?project=modal-verbs-a1
+
 ## Content decks
 
 A video is assembled from a **deck** — a JSON file of entries, one per scene.

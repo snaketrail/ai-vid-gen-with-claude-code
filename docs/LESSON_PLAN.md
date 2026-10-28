@@ -4,9 +4,9 @@ Goal: make a whole **~40-minute English lesson** with this app, using animated
 HTML compositions (in the spirit of HeyGen's HyperFrames) instead of relying on
 ComfyUI stills.
 
-Status: **plan, agreed in outline. Not yet built.** CLAUDE.md is still the spec
-for the existing Shorts pipeline. When Phase A lands, this plan gets folded
-into it as a "long-form" section; Shorts keep working unchanged.
+Status: **Phases A, B, D and the first milestone are done** (see "Progress"
+below). The Shorts pipeline is unchanged and keeps working; lessons are a
+second format beside it (CLAUDE.md section 10).
 
 ---
 
@@ -36,8 +36,9 @@ screenshots frames into ffmpeg. What is missing is:
   voice words (Phase C) wait until then.
 - **Tween engine: home-made**, in `player.js`. No GSAP, no new dependency.
   This fits CLAUDE.md's no-npm/no-CDN rule and keeps `seek(t)` pure.
-- **Format:** 16:9 1920×1080 by default for lessons. Width/height are already
-  project settings, so vertical keeps working.
+- **Format:** 16:9 1920×1080 for lessons (confirmed). Width/height are
+  project settings, so the 9:16 Shorts keep working.
+- **First lesson:** modal verbs, A1 (confirmed).
 - **Plan lives here** in the repo (`docs/LESSON_PLAN.md`).
 
 ## Phases
@@ -120,7 +121,44 @@ building the rest.
   test renders of the animated HTML templates can run there. ComfyUI cannot.
   The container is ephemeral, and rendered MP4s should not be committed to git.
 
+## Progress
+
+**Done**
+- A: CLAUDE.md section 10 documents the long-form format.
+- B: `web/player/anim.js` tween engine. Determinism is enforced by
+  `python -m app.check_determinism` (two browsers, one in reverse order, pixel
+  comparison). Getting it to pass needed `--disable-partial-raster`, removing
+  transforms at rest, and whole-pixel translations.
+- D: 12 templates in `web/player/templates.js`: title, chapter, bullets,
+  vocab, formula, examples, table, compare, dialogue, quiz, recap, end.
+- Part of E: frame reuse. `seek(t)` returns a signature and the exporter skips
+  screenshots for unchanged frames; `--verify-dedupe` proves it is lossless.
+- Part of F: lesson files in `content/lessons/`, built by `app/lesson.py`.
+- `web/player/preview.html?project=<id>`: scrub and play in the browser.
+
+**First milestone: `content/lessons/modal_verbs_a1.json`**
+- A1 modal verbs (can / must / should): 6 chapters, 20 slides, 155 s.
+- Render in the cloud container (4 CPUs, no GPU): **385 s for 155 s of
+  video, about 2.5× real time**. 2207 of 4650 frames reused.
+- Determinism check: 665/665 sampled frames identical, 0 wrong reuses.
+
+**What that means for 40 minutes.** At 2.5× real time, one worker would take
+about 100 min. That is too slow for the < 1 h target, so the rest of Phase E
+matters:
+- per-chapter rendering on parallel Chromium workers (the obvious next win);
+- per-chapter caching, so an edit re-renders one chapter, not the lesson;
+- longer holds in real lessons (with voice-over, slides sit still while the
+  narrator talks) will raise the reuse rate above this dense test's 47%.
+
+**Next**
+1. Phase E: chapter-parallel rendering + per-chapter cache, then measure.
+2. Phase G: lessons in the studio (it is still hard-wired to the Shorts
+   project `ff` and a 9:16 preview).
+3. A lighter font weight: the bundled font is Segoe UI Black only. Bundling
+   a variable Cyrillic font (Inter or Montserrat, OFL) would give body text
+   proper weights.
+4. Voice-over (Phase C), when wanted.
+
 ## Open questions
 
-- Topic and level of the first lesson.
-- Confirm 16:9 for lessons (assumed above).
+- Is the slide pacing right without narration, or should slides hold longer?
