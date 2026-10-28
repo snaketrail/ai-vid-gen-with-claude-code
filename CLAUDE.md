@@ -595,7 +595,8 @@ into a project by `app/lesson.py`; the lesson file is the source of truth.
 - A transform at rest is removed, not set to identity, and Chromium runs
   with `--disable-partial-raster`. Without both, an element that has just
   animated rasterises on slightly different pixels than one that never
-  moved, so a frame would depend on the frames rendered before it.
+  moved, so a frame would depend on the frames rendered before it. For the
+  same reason translations are snapped to whole pixels.
 
 **Determinism is tested, not assumed.** `python -m app.check_determinism
 <project> [--verify-dedupe]` renders sample frames in two browsers (one in

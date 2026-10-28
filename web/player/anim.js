@@ -178,6 +178,11 @@
       for (const prop of Object.keys(DEFAULTS)) {
         v[prop] = tracks[prop] ? r(valueAt(tracks[prop], lt)) : DEFAULTS[prop];
       }
+      // Whole pixels only: at a fractional offset Chromium's text placement
+      // depends on what was drawn the frame before, so the same t could
+      // give different pixels. At 30 fps the snapping is invisible.
+      v.x = Math.round(v.x);
+      v.y = Math.round(v.y);
 
       el.style.opacity = String(clamp01(v.opacity));
       const resting = v.x === 0 && v.y === 0 && v.rotate === 0 &&
