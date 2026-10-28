@@ -278,7 +278,9 @@
 
   /**
    * Fill in the blank: question, options, a countdown, then the reveal.
-   * data: question (with ___), options, answer (index), think (seconds).
+   * data: question (with ___), options, answer (index), think (seconds of
+   * countdown), read (seconds after the slide starts before the countdown,
+   * so a narrator can read the question and options out first).
    */
   function quiz(d) {
     const T = [];
@@ -304,7 +306,7 @@
     });
 
     const think = num(d.think, 3);
-    const cdStart = 1.1 + optEls.length * 0.25 + 0.4;
+    const cdStart = Math.max(1.1 + optEls.length * 0.25 + 0.4, num(d.read, 0));
     const timer = h('div', 'timer', root);
     const fill = h('div', 'fill', timer);
     T.push({ el: timer, preset: 'fade', at: cdStart - 0.2, dur: 0.3 });

@@ -1,5 +1,5 @@
 {
-  "_comment": "First long-form test lesson (docs/LESSON_PLAN.md, first milestone). Each scene names a template in web/player/templates.js; **word** marks a highlight. No voice-over yet, so every scene has an explicit duration. Build and render: python -m app.lesson modal_verbs_a1 --render",
+  "_comment": "First long-form test lesson (docs/LESSON_PLAN.md, first milestone). Each scene names a template in web/player/templates.js; **word** marks a highlight. No voice-over yet, so every scene has an explicit duration, sized so a narrator has time to speak over it (+8 s per slide, +15 s per quiz). Lists build one item every few seconds ('gap') so each appears as it would be spoken, and quizzes wait 'read' seconds before the countdown. Build and render: python -m app.lesson modal_verbs_a1 --render",
   "id": "modal-verbs-a1",
   "title": "Modal Verbs",
   "level": "A1",
@@ -11,7 +11,7 @@
       "scenes": [
         {
           "template": "title",
-          "duration": 6.5,
+          "duration": 14.5,
           "data": {
             "kicker": "English · A1",
             "title": "Modal Verbs",
@@ -21,10 +21,10 @@
         },
         {
           "template": "bullets",
-          "duration": 8,
+          "duration": 16,
           "data": {
             "heading": "Today you will learn",
-            "gap": 1.1,
+            "gap": 4,
             "items": [
               { "text": "**can** — ability & permission", "sub": "мога, умея · може ли" },
               { "text": "**must** — rules & obligation", "sub": "трябва, задължително" },
@@ -34,9 +34,10 @@
         },
         {
           "template": "formula",
-          "duration": 9.5,
+          "duration": 17.5,
           "data": {
             "heading": "One simple pattern",
+            "gap": 2,
             "parts": [
               { "text": "Subject", "hint": "I · you · she" },
               { "text": "modal", "hint": "can · must · should", "accent": true },
@@ -54,12 +55,12 @@
       "scenes": [
         {
           "template": "chapter",
-          "duration": 4,
+          "duration": 12,
           "data": { "number": "01", "title": "can", "subtitle": "ability · permission" }
         },
         {
           "template": "vocab",
-          "duration": 8,
+          "duration": 16,
           "data": {
             "word": "can",
             "ipa": "/kæn/",
@@ -71,9 +72,10 @@
         },
         {
           "template": "examples",
-          "duration": 9.5,
+          "duration": 17.5,
           "data": {
             "heading": "Examples",
+            "gap": 5,
             "items": [
               { "en": "She **can** ride a bike.", "bg": "Тя може да кара колело." },
               { "en": "**Can** I open the window?", "bg": "Може ли да отворя прозореца?" },
@@ -83,9 +85,10 @@
         },
         {
           "template": "table",
-          "duration": 9.5,
+          "duration": 17.5,
           "data": {
             "heading": "Positive, negative, question",
+            "gap": 4,
             "columns": ["Positive", "Negative", "Question"],
             "rows": [
               ["I **can** swim.", "I **can't** swim.", "**Can** I swim?"],
@@ -96,9 +99,10 @@
         },
         {
           "template": "compare",
-          "duration": 9,
+          "duration": 17,
           "data": {
             "heading": "Common mistakes",
+            "gap": 6,
             "pairs": [
               { "wrong": "She cans swim.", "right": "She **can** swim." },
               { "wrong": "I can to swim.", "right": "I **can** swim." }
@@ -114,12 +118,12 @@
       "scenes": [
         {
           "template": "chapter",
-          "duration": 4,
+          "duration": 12,
           "data": { "number": "02", "title": "must", "subtitle": "rules · obligation" }
         },
         {
           "template": "vocab",
-          "duration": 8,
+          "duration": 16,
           "data": {
             "word": "must",
             "ipa": "/mʌst/",
@@ -131,9 +135,10 @@
         },
         {
           "template": "examples",
-          "duration": 9.5,
+          "duration": 17.5,
           "data": {
             "heading": "must & mustn't",
+            "gap": 5,
             "items": [
               { "en": "I **must** go to work.", "bg": "Трябва да отида на работа." },
               { "en": "You **mustn't** smoke here.", "bg": "Тук е забранено да се пуши." },
@@ -149,12 +154,12 @@
       "scenes": [
         {
           "template": "chapter",
-          "duration": 4,
+          "duration": 12,
           "data": { "number": "03", "title": "should", "subtitle": "advice" }
         },
         {
           "template": "vocab",
-          "duration": 8,
+          "duration": 16,
           "data": {
             "word": "should",
             "ipa": "/ʃʊd/",
@@ -166,9 +171,10 @@
         },
         {
           "template": "dialogue",
-          "duration": 10.5,
+          "duration": 18.5,
           "data": {
             "heading": "At the doctor's",
+            "gap": 3.5,
             "lines": [
               { "who": "Anna", "text": "I have a headache." },
               { "who": "Doctor", "text": "You **should** rest." },
@@ -185,42 +191,45 @@
       "scenes": [
         {
           "template": "chapter",
-          "duration": 3.5,
+          "duration": 11.5,
           "data": { "number": "04", "title": "Practice", "subtitle": "Choose the right word" }
         },
         {
           "template": "quiz",
-          "duration": 9.5,
+          "duration": 24.5,
           "data": {
             "label": "QUIZ 1 / 3",
             "question": "You ___ smoke in the hospital.",
             "options": ["can", "mustn't", "should"],
             "answer": 1,
-            "think": 3,
+            "read": 8,
+            "think": 5,
             "explain": "**mustn't** = it's a rule · забранено е"
           }
         },
         {
           "template": "quiz",
-          "duration": 9.5,
+          "duration": 24.5,
           "data": {
             "label": "QUIZ 2 / 3",
             "question": "I ___ swim. I learned when I was five.",
             "options": ["can", "must", "shouldn't"],
             "answer": 0,
-            "think": 3,
+            "read": 8,
+            "think": 5,
             "explain": "**can** = ability · мога, умея"
           }
         },
         {
           "template": "quiz",
-          "duration": 9.5,
+          "duration": 24.5,
           "data": {
             "label": "QUIZ 3 / 3",
             "question": "It's cold. You ___ wear a coat.",
             "options": ["can't", "should", "mustn't"],
             "answer": 1,
-            "think": 3,
+            "read": 8,
+            "think": 5,
             "explain": "**should** = advice · съвет"
           }
         }
@@ -232,7 +241,7 @@
       "scenes": [
         {
           "template": "recap",
-          "duration": 9,
+          "duration": 17,
           "data": {
             "heading": "Remember",
             "items": [
@@ -244,7 +253,7 @@
         },
         {
           "template": "end",
-          "duration": 6,
+          "duration": 14,
           "data": {
             "title": "Well done!",
             "subtitle": "Браво! Next lesson: **have to** vs **must**",
