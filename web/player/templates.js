@@ -28,8 +28,11 @@
     String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   /** **x** -> highlighted span. Everything else is escaped. */
+  // A highlight is inline-block (so it can pulse), and that would let the
+  // punctuation after it wrap onto a line of its own; .nw keeps them together.
   const markup = (s) =>
-    escapeHtml(s || '').replace(/\*\*(.+?)\*\*/g, '<span class="hl">$1</span>');
+    escapeHtml(s || '').replace(/\*\*(.+?)\*\*(\S*)/g,
+      '<span class="nw"><span class="hl">$1</span>$2</span>');
 
   function rich(tag, cls, parent, text) {
     const e = h(tag, cls, parent);
@@ -119,7 +122,13 @@
     const T = [];
     const root = h('div', 't-vocab');
     const left = h('div', 'left', root);
-    T.push({ el: h('div', 'word', left, d.word), preset: 'pop', at: 0.3, dur: 0.6 });
+    const word = h('div', 'word', left, d.word);
+    // The column is fixed width, so long words step down a size rather
+    // than overflow. Length-based, not measured: no layout reads.
+    const len = (d.word || '').length;
+    if (len > 9) word.classList.add('xlong');
+    else if (len > 6) word.classList.add('long');
+    T.push({ el: word, preset: 'pop', at: 0.3, dur: 0.6 });
     if (d.ipa) T.push({ el: h('div', 'ipa', left, d.ipa), preset: 'fade', at: 0.9 });
     T.push({ el: h('div', 'divider', root), preset: 'grow_y', at: 0.6 });
     const right = h('div', 'right', root);
@@ -231,10 +240,8 @@
       // The bundled font has no ✓/✗ glyphs, and a fallback font would differ
       // between machines, so the marks are × and a CSS-drawn tick.
       h('span', 'mark', wrong, '×');
-      const wt = rich('span', 'txt', wrong, p.wrong);
-      const strike = h('div', 'strike', wt);
+      rich('span', 'txt', wrong, p.wrong);
       T.push({ el: wrong, preset: 'slide_right', at });
-      T.push({ el: strike, preset: 'grow_x', at: at + 0.8, dur: 0.35 });
       T.push({ el: wrong, preset: 'shake', at: at + 0.8 });
       T.push({ el: wrong, cls: 'struck', at: at + 0.8 });
       const arrow = h('div', 'arrow', row, '→');
@@ -248,6 +255,33 @@
       const at = start + (d.pairs || []).length * gap;
       T.push({ el: rich('div', 'note', root, d.note), preset: 'fade_up', at });
     }
+    return { root, timeline: T };
+  }
+
+  /**
+   * Sentence transformations, e.g. direct -> reported speech: the original
+   * on the left, the result on the right, one pair at a time.
+   * data: heading, labels [left, right], pairs [{from, to}], start, gap.
+   */
+  function transform(d) {
+    const T = [];
+    const root = h('div', 't-transform');
+    heading(root, d, T);
+    const labels = d.labels || ['Direct speech', 'Reported speech'];
+    const head = h('div', 'row head', root);
+    T.push({ el: h('div', 'lab', head, labels[0]), preset: 'fade_down', at: 0.5 });
+    h('div', null, head);
+    T.push({ el: h('div', 'lab', head, labels[1]), preset: 'fade_down', at: 0.65 });
+    const start = num(d.start, 1.0), gap = num(d.gap, 5);
+    (d.pairs || []).forEach((p, i) => {
+      const at = start + i * gap;
+      const row = h('div', 'row', root);
+      T.push({ el: rich('div', 'from', row, p.from), preset: 'slide_right', at });
+      T.push({ el: h('div', 'arrow', row, '→'), preset: 'fade', at: at + 1.0 });
+      const to = rich('div', 'to', row, p.to);
+      T.push({ el: to, preset: 'wipe', at: at + 1.3, dur: 0.8 });
+      pulseHighlights(to, T, at + 2.2);
+    });
     return { root, timeline: T };
   }
 
@@ -339,7 +373,9 @@
     const T = [];
     const root = h('div', 't-recap');
     heading(root, d, T);
-    const grid = h('div', 'cards', root);
+    // Up to three cards are large; more drop to a compact size so two rows
+    // still fit the slide.
+    const grid = h('div', 'cards' + ((d.items || []).length > 3 ? ' many' : ''), root);
     const start = num(d.start, 0.8), gap = num(d.gap, 0.6);
     (d.items || []).forEach((it, i) => {
       const card = h('div', 'rcard', grid);
@@ -367,6 +403,6 @@
 
   window.Templates = {
     title, chapter, bullets, vocab, formula, examples, table, compare,
-    dialogue, quiz, recap, end,
+    transform, dialogue, quiz, recap, end,
   };
 })();

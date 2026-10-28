@@ -50,6 +50,7 @@
   flex-direction: column;
 }
 
+.slide .nw { white-space: nowrap; }
 .slide .hl {
   display: inline-block;
   color: var(--accent);
@@ -180,6 +181,8 @@
   color: var(--accent);
   letter-spacing: -0.03em;
 }
+.t-vocab .word.long { font-size: 150px; }
+.t-vocab .word.xlong { font-size: 110px; }
 .t-vocab .ipa { font-size: 52px; color: var(--muted); margin-top: 20px; }
 .t-vocab .divider {
   flex: 0 0 8px;
@@ -316,19 +319,41 @@
   transform: rotate(45deg);
 }
 .t-compare .txt { position: relative; }
-.t-compare .strike {
-  position: absolute;
-  left: -6px;
-  right: -6px;
-  top: 52%;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--bad);
-  transform-origin: left center;
+/* The strike is a class switch, not a growing bar, so it follows the text
+   when a wrong sentence wraps onto two lines. */
+.t-compare .wrong.struck .txt {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--bad);
+  text-decoration-thickness: 7px;
 }
-.t-compare .wrong.struck .txt { color: var(--muted); }
 .t-compare .arrow { font-size: 70px; color: var(--muted); }
 .t-compare .note { font-size: 44px; color: var(--muted); margin-top: 50px; text-align: center; }
+
+/* ---- transform (direct -> reported) ---- */
+
+.t-transform .row {
+  display: grid;
+  grid-template-columns: 1fr 90px 1.15fr;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.t-transform .row.head { margin-bottom: 14px; }
+.t-transform .lab {
+  font-size: 30px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.t-transform .from, .t-transform .to {
+  font-size: 50px;
+  line-height: 1.18;
+  padding: 26px 34px;
+  border-radius: 22px;
+}
+.t-transform .from { background: var(--panel); border: 5px solid var(--blue); }
+.t-transform .to { background: #2a2a1e; border: 5px solid var(--accent); }
+.t-transform .arrow { font-size: 64px; color: var(--muted); text-align: center; }
 
 /* ---- dialogue ---- */
 
@@ -459,3 +484,9 @@
 
 /* An optional ComfyUI image behind a slide, dimmed so text stays readable. */
 .scene.slide .bg.photo img { opacity: .28; }
+
+.t-recap .cards.many { gap: 26px; }
+.t-recap .cards.many .rcard { padding: 26px 32px 30px; }
+.t-recap .cards.many .word { font-size: 60px; }
+.t-recap .cards.many .use { font-size: 32px; margin-top: 10px; }
+.t-recap .cards.many .ex { font-size: 36px; margin-top: 16px; }
