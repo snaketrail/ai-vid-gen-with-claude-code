@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>preview</title>
+<!--
+  A bare preview for any project: the player in an iframe, scaled to fit,
+  with a scrubber and play/pause. Like the studio, it is only a second driver
+  of the same window.seek(t) the exporter calls, so what plays here is what
+  renders. Open: /player/preview.html?project=modal-verbs-a1
+
+  The wall clock used for playback lives here, outside the player, which
+  stays a pure function of t.
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0f1a; color: #cfd6e6; font: 14px system-ui, sans-serif;
+         display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px; }
+  #wrap { position: relative; overflow: hidden; background: #000; border-radius: 8px; }
+  #player { border: 0; transform-origin: top left; display: block; }
+  .bar { display: flex; gap: 10px; align-items: center; width: min(960px, 100%); }
+  #scrub { flex: 1; }
+  button { background: #22304f; color: #fff; border: 0; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+  #time { font-family: Consolas, monospace; min-width: 120px; text-align: right; }
+  #scenes { display: flex; flex-wrap: wrap; gap: 6px; width: min(960px, 100%); }
+  #scenes button { font-size: 12px; padding: 4px 8px; background: #18233d; }
+</style>
+</head>
+<body>
+<div id="wrap"><iframe id="player"></iframe></div>
+<div class="bar">
+  <button id="play">Play</button>
+  <input id="scrub" type="range" min="0" max="1" step="0.0001" value="0">
+  <span id="time">0.00</span>
+</div>
+<div id="scenes"></div>
+<script>
+(() => {
+  const id = new URLSearchParams(location.search).get('project');
+  const $ = (x) => document.getElementById(x);
+  const iframe = $('player');
+  let project = null, dur = 0, playing = false, t0 = 0, from = 0, timer = null;
+
+  function fit() {
+    const s = project.settings;
+    const scale = Math.min(960, innerWidth - 32) / s.width;
+    iframe.width = s.width; iframe.height = s.height;
+    iframe.style.transform = `scale(${scale})`;
+    $('wrap').style.width = `${s.width * scale}px`;
+    $('wrap').style.height = `${s.height * scale}px`;
+  }
+
+  async function seek(t) {
+    t = Math.max(0, Math.min(dur, t));
+    $('scrub').value = dur ? t / dur : 0;
+    $('time').textContent = `${t.toFixed(2)} / ${dur.toFixed(2)}`;
+    const w = iframe.contentWindow;
+    if (w && w.seek) await w.seek(t);
+  }
+
+  function stop() { playing = false; clearInterval(timer); $('play').textContent = 'Play'; }
+
+  $('play').onclick = () => {
+    if (playing) return stop();
+    playing = true; $('play').textContent = 'Pause';
+    from = Number($('scrub').value) * dur;
+    if (from >= dur) from = 0;
+    t0 = performance.now();
+    timer = setInterval(() => {
+      const t = from + (performance.now() - t0) / 1000;
+      if (t >= dur) { seek(dur); stop(); } else seek(t);
+    }, 1000 / 30);
+  };
+  $('scrub').oninput = () => { stop(); seek(Number($('scrub').value) * dur); };
+  addEventListener('resize', () => project && fit());
+
+  (async () => {
+    project = await (await fetch(`/api/projects/${id}`)).json();
+    const last = project.scenes[project.scenes.length - 1];
+    dur = last ? last.start + last.duration : 0;
+    fit();
+    for (const s of project.scenes) {
+      const b = document.createElement('button');
+      b.textContent = `${s.id} · ${s.template || s.kind}`;
+      b.onclick = () => { stop(); seek(s.start + 0.01); };
+      $('scenes').appendChild(b);
+    }
+    iframe.onload = async () => { await iframe.contentWindow.ready; seek(0); };
+    iframe.src = `/player/player.html?project=${id}`;
+  })();
+})();
+</script>
+</body>
+</html>

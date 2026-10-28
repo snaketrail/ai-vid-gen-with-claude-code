@@ -1,0 +1,257 @@
+{
+  "_comment": "First long-form test lesson (docs/LESSON_PLAN.md, first milestone). Each scene names a template in web/player/templates.js; **word** marks a highlight. No voice-over yet, so every scene has an explicit duration. Build and render: python -m app.lesson modal_verbs_a1 --render",
+  "id": "modal-verbs-a1",
+  "title": "Modal Verbs",
+  "level": "A1",
+  "fps": 30,
+  "chapters": [
+    {
+      "id": "intro",
+      "title": "Intro",
+      "scenes": [
+        {
+          "template": "title",
+          "duration": 6.5,
+          "data": {
+            "kicker": "English · A1",
+            "title": "Modal Verbs",
+            "subtitle": "Модални глаголи",
+            "tags": ["can", "must", "should"]
+          }
+        },
+        {
+          "template": "bullets",
+          "duration": 8,
+          "data": {
+            "heading": "Today you will learn",
+            "gap": 1.1,
+            "items": [
+              { "text": "**can** — ability & permission", "sub": "мога, умея · може ли" },
+              { "text": "**must** — rules & obligation", "sub": "трябва, задължително" },
+              { "text": "**should** — advice", "sub": "би трябвало · съвет" }
+            ]
+          }
+        },
+        {
+          "template": "formula",
+          "duration": 9.5,
+          "data": {
+            "heading": "One simple pattern",
+            "parts": [
+              { "text": "Subject", "hint": "I · you · she" },
+              { "text": "modal", "hint": "can · must · should", "accent": true },
+              { "text": "verb", "hint": "swim · go · eat" }
+            ],
+            "example": "She **can** swim.",
+            "notes": ["no **to**", "no **-s**"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "can",
+      "title": "Can",
+      "scenes": [
+        {
+          "template": "chapter",
+          "duration": 4,
+          "data": { "number": "01", "title": "can", "subtitle": "ability · permission" }
+        },
+        {
+          "template": "vocab",
+          "duration": 8,
+          "data": {
+            "word": "can",
+            "ipa": "/kæn/",
+            "translation": "мога, умея",
+            "meanings": ["ability", "permission"],
+            "example": "I **can** speak English.",
+            "example_bg": "Мога да говоря английски."
+          }
+        },
+        {
+          "template": "examples",
+          "duration": 9.5,
+          "data": {
+            "heading": "Examples",
+            "items": [
+              { "en": "She **can** ride a bike.", "bg": "Тя може да кара колело." },
+              { "en": "**Can** I open the window?", "bg": "Може ли да отворя прозореца?" },
+              { "en": "Fish **can't** walk.", "bg": "Рибите не могат да ходят." }
+            ]
+          }
+        },
+        {
+          "template": "table",
+          "duration": 9.5,
+          "data": {
+            "heading": "Positive, negative, question",
+            "columns": ["Positive", "Negative", "Question"],
+            "rows": [
+              ["I **can** swim.", "I **can't** swim.", "**Can** I swim?"],
+              ["She **can** cook.", "She **can't** cook.", "**Can** she cook?"],
+              ["They **can** dance.", "They **can't** dance.", "**Can** they dance?"]
+            ]
+          }
+        },
+        {
+          "template": "compare",
+          "duration": 9,
+          "data": {
+            "heading": "Common mistakes",
+            "pairs": [
+              { "wrong": "She cans swim.", "right": "She **can** swim." },
+              { "wrong": "I can to swim.", "right": "I **can** swim." }
+            ],
+            "note": "After a modal: the base verb. No **to**, no **-s**."
+          }
+        }
+      ]
+    },
+    {
+      "id": "must",
+      "title": "Must",
+      "scenes": [
+        {
+          "template": "chapter",
+          "duration": 4,
+          "data": { "number": "02", "title": "must", "subtitle": "rules · obligation" }
+        },
+        {
+          "template": "vocab",
+          "duration": 8,
+          "data": {
+            "word": "must",
+            "ipa": "/mʌst/",
+            "translation": "трябва",
+            "meanings": ["rules", "obligation"],
+            "example": "You **must** wear a seatbelt.",
+            "example_bg": "Трябва да си сложиш колана."
+          }
+        },
+        {
+          "template": "examples",
+          "duration": 9.5,
+          "data": {
+            "heading": "must & mustn't",
+            "items": [
+              { "en": "I **must** go to work.", "bg": "Трябва да отида на работа." },
+              { "en": "You **mustn't** smoke here.", "bg": "Тук е забранено да се пуши." },
+              { "en": "Students **must** listen.", "bg": "Учениците трябва да слушат." }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "should",
+      "title": "Should",
+      "scenes": [
+        {
+          "template": "chapter",
+          "duration": 4,
+          "data": { "number": "03", "title": "should", "subtitle": "advice" }
+        },
+        {
+          "template": "vocab",
+          "duration": 8,
+          "data": {
+            "word": "should",
+            "ipa": "/ʃʊd/",
+            "translation": "би трябвало",
+            "meanings": ["advice", "a good idea"],
+            "example": "You **should** drink water.",
+            "example_bg": "Би трябвало да пиеш вода."
+          }
+        },
+        {
+          "template": "dialogue",
+          "duration": 10.5,
+          "data": {
+            "heading": "At the doctor's",
+            "lines": [
+              { "who": "Anna", "text": "I have a headache." },
+              { "who": "Doctor", "text": "You **should** rest." },
+              { "who": "Anna", "text": "**Can** I go to work?" },
+              { "who": "Doctor", "text": "No. You **shouldn't** go today." }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Practice",
+      "scenes": [
+        {
+          "template": "chapter",
+          "duration": 3.5,
+          "data": { "number": "04", "title": "Practice", "subtitle": "Choose the right word" }
+        },
+        {
+          "template": "quiz",
+          "duration": 9.5,
+          "data": {
+            "label": "QUIZ 1 / 3",
+            "question": "You ___ smoke in the hospital.",
+            "options": ["can", "mustn't", "should"],
+            "answer": 1,
+            "think": 3,
+            "explain": "**mustn't** = it's a rule · забранено е"
+          }
+        },
+        {
+          "template": "quiz",
+          "duration": 9.5,
+          "data": {
+            "label": "QUIZ 2 / 3",
+            "question": "I ___ swim. I learned when I was five.",
+            "options": ["can", "must", "shouldn't"],
+            "answer": 0,
+            "think": 3,
+            "explain": "**can** = ability · мога, умея"
+          }
+        },
+        {
+          "template": "quiz",
+          "duration": 9.5,
+          "data": {
+            "label": "QUIZ 3 / 3",
+            "question": "It's cold. You ___ wear a coat.",
+            "options": ["can't", "should", "mustn't"],
+            "answer": 1,
+            "think": 3,
+            "explain": "**should** = advice · съвет"
+          }
+        }
+      ]
+    },
+    {
+      "id": "recap",
+      "title": "Recap",
+      "scenes": [
+        {
+          "template": "recap",
+          "duration": 9,
+          "data": {
+            "heading": "Remember",
+            "items": [
+              { "word": "can", "use": "ability · permission", "example": "I **can** swim." },
+              { "word": "must", "use": "rules · obligation", "example": "You **must** stop." },
+              { "word": "should", "use": "advice", "example": "You **should** rest." }
+            ]
+          }
+        },
+        {
+          "template": "end",
+          "duration": 6,
+          "data": {
+            "title": "Well done!",
+            "subtitle": "Браво! Next lesson: **have to** vs **must**",
+            "site": "stefdim.online"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -59,6 +59,11 @@
     const bg = document.createElement('div');
     bg.className = 'bg';
 
+    if (scene.kind === 'slide') {
+      buildSlide(scene, root, bg);
+      return;
+    }
+
     const isOutro = scene.kind === 'outro';
 
     if (isOutro) {
@@ -128,7 +133,62 @@
     sceneEls.set(scene.id, { root, bg, scene });
   }
 
+  /**
+   * A long-form lesson slide: a template builds the DOM and its animation
+   * timeline (templates.js, anim.js). Shorts scenes never take this path.
+   */
+  function buildSlide(scene, root, bg) {
+    root.classList.add('slide');
+    const tpl = window.Templates[scene.template];
+    if (!tpl) throw new Error(`Unknown slide template: ${scene.template}`);
+
+    if (scene.image && scene.image.asset) {
+      const img = document.createElement('img');
+      img.src = `/media/${projectId}/${scene.image.asset}`;
+      bg.appendChild(img);
+      bg.classList.add('photo');
+      root.appendChild(bg);
+    }
+
+    const meta = project.meta || {};
+    const chrome = document.createElement('div');
+    chrome.className = 'chrome';
+    const series = document.createElement('div');
+    series.className = 'series';
+    series.textContent = meta.title || '';
+    if (meta.level) {
+      const b = document.createElement('b');
+      b.textContent = ` · ${meta.level}`;
+      series.appendChild(b);
+    }
+    const chap = document.createElement('div');
+    chap.textContent = scene.chapter || '';
+    chrome.appendChild(series);
+    chrome.appendChild(chap);
+    root.appendChild(chrome);
+
+    const content = document.createElement('div');
+    content.className = 'content';
+    const { root: body, timeline } = tpl(scene.data || {}, { scene, meta });
+    content.appendChild(body);
+    root.appendChild(content);
+
+    stage.appendChild(root);
+    sceneEls.set(scene.id, {
+      root, bg: scene.image && scene.image.asset ? bg : null, scene,
+      anim: window.Anim.compile(timeline),
+    });
+  }
+
   function build() {
+    // Shorts are 1080×1920, lessons 1920×1080: the stage follows the project.
+    const s = project.settings || {};
+    const w = s.width || 1080, hgt = s.height || 1920;
+    for (const el of [document.documentElement, document.body, stage]) {
+      el.style.width = `${w}px`;
+      el.style.height = `${hgt}px`;
+    }
+
     stage.innerHTML = '';
     sceneEls.clear();
     for (const scene of project.scenes) buildScene(scene);
@@ -216,20 +276,27 @@
     const { root, bg, scene } = entry;
     root.style.display = 'block';
     root.style.opacity = String(opacity);
+    let sig = `${scene.id}@${opacity}`;
 
-    const dur = scene.duration || 1;
-    const p = easeInOutCubic(clamp01(lt / dur));
-    const motion = (scene.image && scene.image.motion) || { type: 'zoom_in', amount: 1.12 };
-    const fn = MOTION[motion.type] || MOTION.none;
-    bg.style.transform = fn(p, motion.amount || 1.12);
+    if (bg) {
+      const dur = scene.duration || 1;
+      const p = easeInOutCubic(clamp01(lt / dur));
+      const motion = (scene.image && scene.image.motion) || { type: 'zoom_in', amount: 1.12 };
+      const fn = MOTION[motion.type] || MOTION.none;
+      bg.style.transform = fn(p, motion.amount || 1.12);
+      sig += `:${bg.style.transform}`;
+    }
+    if (entry.anim) sig += `:${window.Anim.apply(entry.anim, lt)}`;
+    return sig;
   }
 
   function seek(t) {
-    if (!project) return Promise.resolve();
+    if (!project) return Promise.resolve('');
 
     for (const entry of sceneEls.values()) {
       entry.root.style.display = 'none';
     }
+    const sig = [];
 
     const scenes = project.scenes;
     for (let i = 0; i < scenes.length; i++) {
@@ -250,20 +317,25 @@
         if (t >= fadeStart) {
           const fp = easeInOutCubic(clamp01((t - fadeStart) / CROSSFADE));
           // Outgoing scene keeps animating while fading out.
-          applyScene(entry, lt, 1 - fp);
+          sig.push(applyScene(entry, lt, 1 - fp));
           // The incoming scene overlaps backwards into the outgoing scene's
           // time, so its local time is negative here; the motion easing
-          // clamps it, and the card is static, so this is well-defined.
-          applyScene(sceneEls.get(next.id), t - next.start, fp);
+          // clamps it, and slide animations hold their first frame, so this
+          // is well-defined.
+          sig.push(applyScene(sceneEls.get(next.id), t - next.start, fp));
           break;
         }
       }
-      applyScene(entry, lt, 1);
+      sig.push(applyScene(entry, lt, 1));
       break;
     }
 
     renderCaptions(t);
-    return Promise.resolve();
+    sig.push(captionsEl.style.display, captionsEl.innerHTML);
+    // The signature describes everything seek() set. Equal signatures mean
+    // identical pixels, so the exporter can reuse the previous screenshot
+    // during holds instead of taking a new one.
+    return Promise.resolve(sig.join('#'));
   }
 
   // ---- readiness ------------------------------------------------------

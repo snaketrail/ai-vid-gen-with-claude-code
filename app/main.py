@@ -21,6 +21,7 @@ from . import assemble as assemble_mod
 from . import audio as audio_mod
 from . import comfy as comfy_mod
 from . import export as export_mod
+from . import lesson as lesson_mod
 from . import outro as outro_mod
 from . import store
 from .models import Project, Scene
@@ -81,7 +82,9 @@ def api_get_project(project_id: str, with_outro: bool = True) -> dict:
         raise HTTPException(404, f"No such project: {project_id}")
 
     data = project.model_dump()
-    if with_outro and project_id != outro_mod.BUILDER_ID:
+    # The cached outro is a 9:16 Shorts clip; lessons are 16:9 and end on
+    # their own closing slide instead.
+    if with_outro and project.format == "short" and project_id != outro_mod.BUILDER_ID:
         extra = outro_mod.preview_scene()
         if extra and project.scenes:
             extra["start"] = project.total_duration()
@@ -133,6 +136,15 @@ def api_assemble(project_id: str, body: AssembleReq) -> dict:
         used=used, deck=body.deck,
     )
     return p.model_dump()
+
+
+@app.post("/api/lessons/{name}/build")
+def api_build_lesson(name: str) -> dict:
+    """Build (or rebuild) a lesson project from content/lessons/<name>.json."""
+    try:
+        return lesson_mod.build(name).model_dump()
+    except FileNotFoundError as e:
+        raise HTTPException(404, str(e))
 
 
 @app.get("/api/checkpoints")
@@ -263,8 +275,9 @@ def api_export(project_id: str) -> dict:
             def outro_progress(f: float, msg: str) -> None:
                 on_progress(f * 0.35, msg)
 
-            outro_clip = outro_mod.ensure(
-                base_url=BASE_URL, on_progress=outro_progress
+            outro_clip = (
+                outro_mod.ensure(base_url=BASE_URL, on_progress=outro_progress)
+                if project.format == "short" else None
             )
 
             on_progress(0.36, "Building audio")

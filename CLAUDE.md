@@ -31,6 +31,11 @@ The second defining requirement is **granular regeneration**: the user sees
 every part of the video laid out and can re-roll *one* image, *one* voice line,
 or *one* piece of text without touching anything else.
 
+**Second format: long-form lessons.** Alongside the Shorts (which stay
+exactly as they are), the app makes **16:9 1920×1080 YouTube lessons** of up
+to ~40 minutes, built from animated HTML slides. Same player, same exporter;
+see section 10 and `docs/LESSON_PLAN.md`.
+
 **Non-goals:** no cloud deploy, no auth, no multi-user, no monetisation, no
 packaging or distribution, no AI video models. Never add these.
 
@@ -560,3 +565,47 @@ After each phase: run end to end, confirm the MP4 plays, then commit.
 - Whether scenes are written by hand or generated from a topic line by an LLM.
   A possible Phase 6; the architecture supports it, since an LLM would simply
   populate `project.json`.
+
+---
+
+## 10. Long-form lessons (16:9) — added alongside the Shorts
+
+The Shorts pipeline above is unchanged and must keep working. Lessons are a
+second project **format** that reuses the same player and exporter. The full
+plan and phase status live in `docs/LESSON_PLAN.md`.
+
+**Data.** `project.format` is `"short"` (default) or `"lesson"`. A lesson's
+scenes have `kind: "slide"`, a `template` name, free-form `data` for that
+template, and a `chapter`. `project.meta` holds the title and level for the
+slide header. Lessons are written as `content/lessons/<name>.json` and built
+into a project by `app/lesson.py`; the lesson file is the source of truth.
+
+**Rendering.**
+- `web/player/anim.js` — the tween engine. A timeline is a list of entries
+  (`{el, preset, at}`, raw `{el, from, to, at, dur, ease}`, or a class switch
+  `{el, cls, at, until}`). `Anim.apply(compiled, lt)` sets styles from the
+  local time alone. Presets live in one table.
+- `web/player/templates.js` — slide templates: `(data, ctx) -> {root,
+  timeline}`. Timing depends only on data, never on layout reads.
+- `web/player/lesson.css` — 16:9 slide styles. `scene.css` is loaded too, so
+  never reuse its class names (`.bg`, `.card`, `.outro`, ...).
+- Text fields accept `**word**` for a highlight.
+- The bundled font has no ✓/✗ glyphs. Never use a character the font lacks:
+  the fallback font differs between machines and the export would change.
+- A transform at rest is removed, not set to identity: Chromium otherwise
+  rasterises text that has just moved on slightly different pixels.
+
+**Determinism is tested, not assumed.** `python -m app.check_determinism
+<project> [--verify-dedupe]` renders sample frames in two browsers (one in
+reverse order) and requires identical PNGs. Run it after any player change.
+
+**Frame reuse.** `seek(t)` resolves to a signature of everything it set. The
+exporter reuses the previous PNG when the signature is unchanged, which skips
+most screenshots during holds. `--verify-dedupe` proves this is lossless.
+
+**No outro on lessons.** The cached outro is a 9:16 clip; lessons end on
+their own `end` slide.
+
+**Voice-over is deferred** for lessons: slide durations are explicit in the
+lesson file until it is added.
+

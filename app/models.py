@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -68,8 +68,9 @@ class Card(BaseModel):
 
 class Scene(BaseModel):
     id: str
-    # "card" is a normal false-friend scene; "outro" is the branded end card.
-    kind: Literal["card", "outro"] = "card"
+    # "card" is a normal false-friend scene; "outro" is the branded end card;
+    # "slide" is an animated long-form lesson slide (docs/LESSON_PLAN.md).
+    kind: Literal["card", "outro", "slide"] = "card"
     # start/duration are always recomputed by the backend, never trusted
     # from the client (CLAUDE.md 5.2).
     start: float = 0.0
@@ -78,6 +79,11 @@ class Scene(BaseModel):
     image: ImageAsset = Field(default_factory=ImageAsset)
     voice: VoiceAsset = Field(default_factory=VoiceAsset)
     card: Card = Field(default_factory=Card)
+    # Slides only: which template in web/player/templates.js draws the
+    # scene, its content, and the chapter it belongs to.
+    template: str = ""
+    data: dict[str, Any] = Field(default_factory=dict)
+    chapter: str = ""
     # Extra hold after the voice-over ends. The outro uses it to let the logo
     # sit on screen for a beat before the video cuts.
     hold: float = 0.0
@@ -102,6 +108,11 @@ class Music(BaseModel):
 
 class Project(BaseModel):
     id: str
+    # "short" is the original 9:16 Shorts format; "lesson" is long-form 16:9
+    # YouTube. Both share one player and one exporter.
+    format: Literal["short", "lesson"] = "short"
+    # Lesson title and level, shown in the slide header.
+    meta: dict[str, Any] = Field(default_factory=dict)
     created_at: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )

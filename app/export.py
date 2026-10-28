@@ -7,6 +7,7 @@ Same code path, so the preview cannot drift from the export (CLAUDE.md 4.2).
 
 from __future__ import annotations
 
+import os
 import subprocess
 import threading
 from pathlib import Path
@@ -56,8 +57,15 @@ def render(
     audio_path: Optional[Path] = None,
     on_progress: Optional[ProgressFn] = None,
     out_path: Optional[Path] = None,
+    dedupe: bool = True,
 ) -> Path:
-    """Render the project to MP4. Returns the output path."""
+    """Render the project to MP4. Returns the output path.
+
+    With `dedupe`, a frame whose seek() signature equals the previous frame's
+    reuses the previous PNG instead of taking a screenshot. Lessons are mostly
+    holds between animations, so this skips most of the screenshots.
+    `python -m app.check_determinism --verify-dedupe` proves it is lossless.
+    """
     from playwright.sync_api import sync_playwright
 
     fps = project.settings.fps
@@ -81,6 +89,9 @@ def render(
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(
+            # Only needed where Chromium is preinstalled outside Playwright's
+            # own cache (e.g. a cloud container); unset on the Windows machine.
+            executable_path=os.environ.get("PLAYWRIGHT_CHROMIUM_PATH") or None,
             args=[
                 "--disable-lcd-text",           # deterministic glyph rasterisation
                 "--force-device-scale-factor=1",
@@ -142,13 +153,20 @@ def render(
                 stderr_thread.join(timeout=2)
                 return b"".join(stderr_chunks).decode("utf-8", "replace")
 
+            prev_sig: Optional[str] = None
+            png = b""
+            reused = 0
             try:
                 for frame in range(total_frames):
                     t = frame / fps
                     # Bound every browser call: if Chromium dies the default is
                     # to block indefinitely, which looks like a silent hang.
-                    page.evaluate("(t) => window.seek(t)", t)
-                    png = page.screenshot(type="png", timeout=20000)
+                    sig = page.evaluate("(t) => window.seek(t)", t)
+                    if dedupe and sig and sig == prev_sig:
+                        reused += 1
+                    else:
+                        png = page.screenshot(type="png", timeout=20000)
+                    prev_sig = sig
                     proc.stdin.write(png)
                     proc.stdin.flush()
 
@@ -173,5 +191,5 @@ def render(
         finally:
             browser.close()
 
-    progress(1.0, f"Done: {out_path.name}")
+    progress(1.0, f"Done: {out_path.name} ({reused}/{total_frames} frames reused)")
     return out_path
