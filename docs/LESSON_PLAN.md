@@ -137,18 +137,25 @@ building the rest.
 - `web/player/preview.html?project=<id>`: scrub and play in the browser.
 
 **First milestone: `content/lessons/modal_verbs_a1.json`**
-- A1 modal verbs (can / must / should): 6 chapters, 20 slides, 155 s.
-- Render in the cloud container (4 CPUs, no GPU): **385 s for 155 s of
-  video, about 2.5× real time**. 2207 of 4650 frames reused.
-- Determinism check: 665/665 sampled frames identical, 0 wrong reuses.
+- A1 modal verbs (can / must / should): 6 chapters, 20 slides.
+- First cut was 155 s and too fast to narrate. Re-paced on user feedback:
+  every slide +8 s, every quiz +15 s, lists build one item every few
+  seconds (`gap`), quizzes wait 8 s (`read`) before a 5 s countdown.
+  Now **336 s**.
+- Render in the cloud container (4 CPUs, no GPU), one Chromium worker:
 
-**What that means for 40 minutes.** At 2.5× real time, one worker would take
-about 100 min. That is too slow for the < 1 h target, so the rest of Phase E
-matters:
-- per-chapter rendering on parallel Chromium workers (the obvious next win);
-- per-chapter caching, so an edit re-renders one chapter, not the lesson;
-- longer holds in real lessons (with voice-over, slides sit still while the
-  narrator talks) will raise the reuse rate above this dense test's 47%.
+  | Version | Video | Render time | Speed | Frames reused |
+  |---|---|---|---|---|
+  | dense (155 s) | 155 s | 386 s | 2.5× real time | 47% |
+  | narrated pacing (336 s) | 336 s | 499 s | **1.5× real time** | 74% |
+
+- Determinism check: all sampled frames identical, 0 wrong reuses.
+
+**What that means for 40 minutes.** Slower, narration-paced slides are mostly
+holds, and holds are almost free thanks to frame reuse. At 1.5× real time a
+40-minute lesson is about **60 min on one worker** in the container, so the
+< 1 h target is roughly met already; per-chapter parallel workers would cut
+it further, and per-chapter caching would make edits re-render one chapter.
 
 **Next**
 1. Phase E: chapter-parallel rendering + per-chapter cache, then measure.
